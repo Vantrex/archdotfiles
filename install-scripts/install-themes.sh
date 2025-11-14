@@ -1,2 +1,2 @@
 #!/bin/bash
-sudo pacman -S --noconfirm nwg-look
+sudo pacman -S --noconfirm gtk3 nwg-look
