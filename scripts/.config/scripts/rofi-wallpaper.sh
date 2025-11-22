@@ -27,11 +27,13 @@ selection="$(
       -iname '*.jpg'  -o \
       -iname '*.jpeg' -o \
       -iname '*.webp' -o \
+      -iname '*.gif' -o \
       -iname '*.bmp' \
     \) -print0 \
   | while IFS= read -r -d '' file; do
       rel="${file#$WALL_DIR/}"
-      printf '%s\0icon\x1fthumbnail://%s\n' "$rel" "$file"
+#      printf '%s\0icon\x1fthumbnail://%s\n' "$rel" "$file"
+      printf '%s\0icon\x1f%s\n' "$rel" "$file"
     done \
   | sort \
   | rofi \
@@ -40,6 +42,7 @@ selection="$(
       -matching fuzzy \
       -show-icons \
       -theme ~/.config/rofi/wallpaper_grid_dark.rasi \
+      -theme-str 'element-icon { size: 400px; }' \
       -p "Wallpaper" \
       2>/dev/null
 )"
