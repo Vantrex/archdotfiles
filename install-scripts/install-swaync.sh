@@ -1,2 +1,2 @@
 #!/bin/bash
-sudo pacman -Sy --noconfirm swaync
+sudo pacman -Sy --needed --noconfirm swaync

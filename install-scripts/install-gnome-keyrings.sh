@@ -1,2 +1,2 @@
 #!/bin/bash
-sudo pacman -Sy --noconfirm gnome-keyring
+sudo pacman -Sy --needed --noconfirm gnome-keyring

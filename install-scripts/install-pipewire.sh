@@ -1,2 +1,2 @@
 #!/bin/bash
-sudo pacman -Sy --noconfirm pipewire wireplumber
+sudo pacman -Sy --needed --noconfirm pipewire wireplumber

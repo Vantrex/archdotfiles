@@ -1,2 +1,2 @@
 #!/bin/bash
-sudo pacman -Sy --noconfirm btop
+sudo pacman -Sy --needed --noconfirm btop

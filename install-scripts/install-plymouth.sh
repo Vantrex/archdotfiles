@@ -1,5 +1,5 @@
 #!/bin/bash
-sudo pacman -Sy --noconfirm plymouth
+sudo pacman -Sy --needed --noconfirm plymouth
 
 
 set -euo pipefail
@@ -64,7 +64,7 @@ MODULES="nvidia nvidia_modeset nvidia_uvm nvidia_drm"
 echo "Regenerating initframes.."
 sudo mkinitcpio -P
 
-sudo pacman -S --noconfirm dracut
+sudo pacman -S --needed --noconfirm dracut
 echo 'add_dracutmodules+=" plymouth "' | sudo tee /etc/dracut.conf.d/myflags.conf
 
 sleep 5

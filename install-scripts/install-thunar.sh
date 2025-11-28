@@ -1,2 +1,2 @@
 #!/bin/bash
-sudo pacman -Sy --noconfirm thunar gvfs thunar-volman
+sudo pacman -Sy --needed --noconfirm thunar gvfs thunar-volman

@@ -1,2 +1,2 @@
 #!/bin/bash
-sudo pacman -S --noconfirm cliphist
+sudo pacman -S --needed --noconfirm cliphist

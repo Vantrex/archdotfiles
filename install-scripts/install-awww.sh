@@ -1,2 +1,2 @@
 #!/bin/bash
-yay -S --noconfirm awww-git
+yay -S --needed --noconfirm awww-git
