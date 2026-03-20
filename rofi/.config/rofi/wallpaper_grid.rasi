@@ -1,0 +1,48 @@
+configuration {
+    show-icons: true;
+}
+
+window {
+    width: 80%;
+    height: 80%;
+    location: center;
+}
+
+mainbox {
+    padding: 10px;
+}
+
+listview {
+    columns: 5;          /* number of “cards” per row */
+    lines: 3;            /* how many rows are visible */
+    spacing: 10px;
+    cycle: true;
+    fixed-columns: true;
+    fixed-height: true;
+    dynamic: false;
+}
+
+element {
+    orientation: vertical;
+    padding: 10px;
+    border-radius: 6px;
+    spacing: 5px;
+}
+
+element-icon {
+    size: 128;           /* thumbnail size */
+    horizontal-align: 0.5;
+}
+
+element-text {
+    horizontal-align: 0.5;
+}
+
+element selected {
+    /* optional: visually highlight selected card */
+    border: 2px;
+}
+
+configuration {
+    mouse-accept-entry: 1;
+}

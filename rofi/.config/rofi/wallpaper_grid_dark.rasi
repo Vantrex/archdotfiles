@@ -1,0 +1,113 @@
+* {
+    accent:         #89b4fa;
+    bg:             #1e1e2e;
+    bg-alt:         #181825;
+    fg:             #cdd6f4;   /* was #171616 */
+    fg-muted:       #a6adc8;   /* was #050505ff */
+    bg-selected:    #313244;
+    border-color:   #89b4fa;
+}
+
+configuration {
+    show-icons: true;
+    mouse-accept-entry: 1;  /* single-click accepts */
+}
+
+window {
+    width: 1650px;
+    height: 90%;
+    location: center;
+    anchor: center;
+    border: 2px;
+    border-color: @border-color;
+    padding: 1px;
+    background-color: @bg;
+}
+
+mainbox {
+    spacing: 0px;          /* was 10px */
+    padding: 0px;          /* was 10px */
+    background-color: transparent;
+}
+
+listview {
+    columns: 4;            /* fewer columns => bigger images */
+    lines: 2;              /* adjust as you like */
+    spacing: 0px;          /* smaller gap between cells */
+    cycle: true;
+    dynamic: true;
+    fixed-height: true;
+    fixed-columns: true;
+
+    scrollbar: true;
+    scrollbar-width: 6px;
+    scrollbar-padding: 2px;
+
+    background-color: transparent;
+}
+
+scrollbar {
+    handle-width: 6px;
+    background-color: @bg-alt;
+    handle-color: @accent;
+}
+
+
+element {
+    orientation: vertical;
+    children: [ element-icon ];   /* only the icon, no element-text */
+    padding: 0px;
+    spacing: 0px;
+    margin: 0px;
+    border-radius: 0px;
+    background-color: transparent;
+    text-color: @fg-muted;
+}
+
+/* selection highlight just draws around the cell, no inner padding */
+element selected {
+    background-color: rgba(137, 180, 250, 0.25);
+    text-color: @fg;
+    border: 2px;
+    border-color: @border-color;
+}
+
+/* For active/confirmed (not super visible but we set it anyway) */
+element active {
+    background-color: @accent;
+    text-color: #11111b;
+}
+
+element-icon {
+    size: 250;                 /* bump this up; tweak to taste */
+    horizontal-align: 0.5;
+    vertical-align: 0.5;
+    background-color: transparent;
+    border: 0;
+    border-radius: 0;
+}
+
+
+element-text {
+    enabled: false;
+}
+
+
+inputbar {
+    background-color: @bg-alt;
+    text-color: @fg;
+    padding: 6px;
+    border-radius: 6px;
+}
+
+prompt {
+    background-color: transparent;
+    text-color: @fg-muted;
+}
+
+entry {
+    background-color: transparent;
+    text-color: @fg;
+    placeholder-color: @fg-muted;
+}
+

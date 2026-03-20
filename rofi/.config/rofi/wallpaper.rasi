@@ -1,0 +1,21 @@
+configuration {
+    show-icons: true;
+}
+
+window {
+    width: 60%;
+    height: 70%;
+}
+
+listview {
+    lines: 10;
+}
+
+element-icon {
+    size: 128;      /* increase for bigger previews */
+}
+
+element-text {
+    vertical-align: 0.5;
+}
+
