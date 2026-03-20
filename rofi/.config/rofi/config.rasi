@@ -1,0 +1,125 @@
+/* Tokyo Night theme for rofi */
+
+* {
+    bg:             #1a1b26;
+    bg-alt:         #24283b;
+    fg:             #c0caf5;
+    fg-muted:       #565f89;
+    accent:         #7aa2f7;
+    red:            #f7768e;
+    green:          #9ece6a;
+    border-col:     #7aa2f7;
+    selected:       #33467c;
+
+    background-color: transparent;
+    text-color:       @fg;
+}
+
+configuration {
+    show-icons:        true;
+    display-drun:      "";
+    display-run:       "";
+    display-window:    "";
+    drun-display-format: "{name}";
+}
+
+window {
+    width:            600px;
+    location:         center;
+    anchor:           center;
+    border:           2px;
+    border-color:     @border-col;
+    border-radius:    12px;
+    background-color: @bg;
+}
+
+mainbox {
+    spacing:  0;
+    padding:  0;
+}
+
+inputbar {
+    padding:          12px 16px;
+    spacing:          12px;
+    background-color: @bg-alt;
+    border:           0 0 1px 0;
+    border-color:     @border-col;
+    border-radius:    12px 12px 0 0;
+    children:         [ prompt, entry ];
+}
+
+prompt {
+    text-color: @accent;
+}
+
+entry {
+    placeholder:       "Search...";
+    placeholder-color: @fg-muted;
+    text-color:        @fg;
+}
+
+listview {
+    lines:            8;
+    columns:          1;
+    padding:          8px 0;
+    fixed-height:     true;
+    scrollbar:        false;
+}
+
+element,
+element normal.normal,
+element alternate.normal {
+    padding:          10px 16px;
+    spacing:          12px;
+    border-radius:    0;
+    background-color: @bg;
+    text-color:       @fg;
+}
+
+element selected.normal {
+    background-color: @selected;
+    text-color:       @fg;
+}
+
+element normal.active,
+element alternate.active {
+    background-color: @bg;
+    text-color:       @green;
+}
+
+element selected.active {
+    background-color: @selected;
+    text-color:       @green;
+}
+
+element normal.urgent,
+element alternate.urgent {
+    background-color: @bg;
+    text-color:       @red;
+}
+
+element selected.urgent {
+    background-color: @selected;
+    text-color:       @red;
+}
+
+element-icon {
+    size:             24;
+    vertical-align:   0.5;
+    background-color: inherit;
+}
+
+element-text {
+    vertical-align:   0.5;
+    background-color: inherit;
+    text-color:       inherit;
+}
+
+message {
+    padding:          12px 16px;
+    background-color: @bg-alt;
+}
+
+textbox {
+    text-color: @fg-muted;
+}
