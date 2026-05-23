@@ -1,0 +1,10 @@
+-- Permissions are commented out by default
+-- hl.config({
+--   ecosystem = {
+--     enforce_permissions = true
+--   }
+-- })
+--
+-- hl.permission({ path = "/usr/(bin|local/bin)/grim", profile = "screencopy", action = "allow" })
+-- hl.permission({ path = "/usr/(lib|libexec|lib64)/xdg-desktop-portal-hyprland", profile = "screencopy", action = "allow" })
+-- hl.permission({ path = "/usr/(bin|local/bin)/hyprpm", profile = "plugin", action = "allow" })

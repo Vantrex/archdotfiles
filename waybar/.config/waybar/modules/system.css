@@ -1,0 +1,14 @@
+#cpu {
+    font-weight: normal;
+    font-size: 22px;
+    color: @wb-purple;
+}
+
+#memory,
+#custom-gpuinfo,
+#custom-keybindhint,
+#language {
+    font-weight: normal;
+    font-size: 22px;
+    color: @wb-orange;
+}

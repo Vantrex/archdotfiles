@@ -1,0 +1,9 @@
+#backlight {
+    color: @wb-cyan;
+    background: transparent;
+    font-weight: normal;
+    font-size: 19px;
+    margin: 1px 0px 0px 0px;
+    padding-left: 0px;
+    padding-right: 2px;
+}

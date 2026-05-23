@@ -1,0 +1,34 @@
+#battery {
+    font-weight: normal;
+    font-size: 22px;
+    color: @wb-green;
+    background: transparent;
+    opacity: 1;
+    margin: 0px;
+    padding-left: 0px;
+    padding-right: 0px;
+}
+
+#battery.charging,
+#battery.plugged {
+    color: @wb-fg;
+}
+
+#battery.critical:not(.charging) {
+    color: @wb-red;
+}
+
+#upower,
+#upower#headset,
+#cava {
+    color: @wb-green;
+}
+
+#idle_inhibitor {
+    color: @wb-teal;
+    background: transparent;
+    opacity: 1;
+    margin: 4px 0px 4px 0px;
+    padding-left: 4px;
+    padding-right: 4px;
+}

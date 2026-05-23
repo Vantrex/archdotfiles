@@ -1,0 +1,224 @@
+/* Spacers */
+#custom-spacer,
+#custom-smallspacer {
+    opacity: 0.0;
+}
+
+#custom-active-windows-DP-2,
+#custom-active-windows-DP-3,
+#custom-active-windows-HDMI-A-2 {
+    color: @wb-fg-dark;
+    font-size: 16px;
+    padding-left: 0px;
+    padding-right: 6px;
+    margin: 0px;
+}
+
+/* Per-monitor visibility: waybar's `output` filter is ignored for custom
+   modules, so we hide the wrong-monitor instances via the bar's output
+   class on window#waybar. */
+window#waybar.DP-2      #custom-active-windows-DP-3,
+window#waybar.DP-2      #custom-active-windows-HDMI-A-2,
+window#waybar.DP-3      #custom-active-windows-DP-2,
+window#waybar.DP-3      #custom-active-windows-HDMI-A-2,
+window#waybar.HDMI-A-2  #custom-active-windows-DP-2,
+window#waybar.HDMI-A-2  #custom-active-windows-DP-3 {
+    opacity: 0;
+    font-size: 0;
+    min-width: 0px;
+    padding: 0;
+    margin: 0;
+}
+
+#custom-sep {
+    color: @wb-comment;
+    font-size: 18px;
+    font-weight: normal;
+    padding-left: 8px;
+    padding-right: 8px;
+    margin: 0px;
+}
+
+/* Mouse / power / theme buttons */
+#custom-mouse {
+    font-size: 14px;
+    margin-bottom: 6px;
+    background: @wb-bg-dark;
+}
+
+#custom-power {
+    font-size: 15px;
+    color: @wb-fg;
+    background: alpha(@wb-bg-dark, 0.9);
+    margin: 6px 0px 6px 0px;
+    padding-left: 4px;
+    padding-right: 4px;
+}
+
+#custom-waybar-theme {
+    color: @wb-purple;
+    background: transparent;
+    font-size: 15px;
+    margin: 0px 2px 0px 2px;
+    padding-left: 4px;
+    padding-right: 4px;
+}
+
+#custom-waybar-theme:hover {
+    color: @wb-magenta;
+}
+
+/* Spicetify adaptive colors toggle */
+#custom-spicetify-adaptive {
+    color: @wb-green;
+    background: transparent;
+    font-size: 15px;
+    margin: 0px 2px 0px 2px;
+    padding-left: 4px;
+    padding-right: 4px;
+}
+
+#custom-spicetify-adaptive:hover {
+    color: @wb-blue;
+}
+
+/* Bluetooth / cliphist */
+#bluetooth,
+#custom-cliphist {
+    color: @wb-fg;
+    background: @wb-bg-dark;
+    opacity: 1;
+    margin: 4px 0px 4px 0px;
+    padding-left: 4px;
+    padding-right: 4px;
+}
+
+/* Taskbar (using GTK named colors defined by theme) */
+#taskbar {
+    padding: 1px;
+}
+
+#taskbar button {
+    box-shadow: none;
+    text-shadow: none;
+    font-size: 4px;
+    padding: 0px;
+    border-radius: 9px;
+    margin-bottom: 3px;
+    margin-left: 0px;
+    padding-left: 3px;
+    padding-right: 3px;
+    margin-right: 0px;
+    color: @wb-fg;
+}
+
+#taskbar button.active {
+    background: @wb-highlight;
+    color: @wb-fg;
+    margin-left: 3px;
+    padding-left: 12px;
+    padding-right: 12px;
+    margin-right: 3px;
+    transition: all 0.4s cubic-bezier(.55,-0.68,.48,1.682);
+    min-height: 9px;
+}
+
+#taskbar button:hover {
+    background: @wb-bg-dark;
+    color: @wb-blue;
+    transition: all 0.3s cubic-bezier(.55,-0.68,.48,1.682);
+}
+
+/* LED indicator */
+#custom-led {
+    background: @wb-teal;
+    color: @wb-fg;
+    margin-top: 7px;
+    margin-bottom: 7px;
+    padding-left: 6px;
+    border-radius: 7px;
+    margin-right: 6px;
+}
+
+/* Theme/menu/spotify (semi-transparent decoration) */
+#custom-spotify,
+#custom-menu {
+    color: @wb-fg;
+    background: transparent;
+    margin: 0px;
+    padding-left: 1px;
+    padding-right: 1px;
+    opacity: 0.1;
+}
+
+/* Wallchange/wbar/updates */
+#custom-updates,
+#custom-wallchange,
+#custom-wbar {
+    color: @wb-fg;
+    font-family: "Martian Mono";
+}
+
+/* End-cap pseudo modules */
+#custom-l_end,
+#custom-r_end,
+#custom-sl_end,
+#custom-sr_end,
+#custom-rl_end {
+    color: @wb-green;
+}
+
+#custom-rr_end {
+    font-weight: normal;
+    color: @wb-fg;
+    background: transparent;
+    opacity: 1;
+    margin: 0px;
+    padding-left: 4px;
+    padding-right: 4px;
+    border-radius: 0px 7px 7px 0px;
+    margin-right: 1px;
+    padding-right: 3px;
+}
+
+#custom-r_end {
+    border-radius: 0px 7px 7px 0px;
+    margin-right: 1px;
+    padding-right: 3px;
+}
+
+#custom-l_end {
+    border-radius: 7px 0px 0px 7px;
+    margin-left: 1px;
+    padding-left: 3px;
+}
+
+#custom-sr_end {
+    border-radius: 0px;
+    margin-right: 1px;
+    padding-right: 3px;
+}
+
+#custom-sl_end {
+    border-radius: 0px;
+    margin-left: 1px;
+    padding-left: 3px;
+}
+
+#custom-rl_end {
+    border-radius: 7px 0px 0px 7px;
+    margin-left: 1px;
+    padding-left: 3px;
+}
+
+/* Launchers */
+#custom-expand {
+    min-width: 25px;
+    color: @wb-fg;
+    font-size: 16px;
+}
+
+#group-minimized {
+    border-left: solid;
+    border-left-width: 1px;
+}

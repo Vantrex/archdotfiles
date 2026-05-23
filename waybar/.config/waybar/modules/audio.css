@@ -1,0 +1,34 @@
+#pulseaudio {
+    font-weight: normal;
+    font-size: 18px;
+    color: @wb-blue;
+    background: transparent;
+    opacity: 1;
+    margin: 0px;
+    padding-left: 3px;
+    padding-right: 3px;
+}
+
+#backlight-slider slider,
+#pulseaudio-slider slider {
+    background: @wb-fg;
+    background-color: transparent;
+    box-shadow: none;
+    margin-right: 7px;
+}
+
+#backlight-slider trough,
+#pulseaudio-slider trough {
+    margin-top: -3px;
+    min-width: 90px;
+    min-height: 10px;
+    margin-bottom: -4px;
+    border-radius: 8px;
+    background: @wb-bg-dark;
+}
+
+#backlight-slider highlight,
+#pulseaudio-slider highlight {
+    border-radius: 8px;
+    background-color: @wb-cyan;
+}

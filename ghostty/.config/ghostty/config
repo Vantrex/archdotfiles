@@ -1,6 +1,6 @@
 shell-integration = zsh
-shell-integration-features = ssh-terminfo,ssh-env
+shell-integration-features = ssh-terminfo,ssh-env,no-title
 command = /usr/bin/zsh
 background = 000000
 working-directory = home
-title = "Ghostyy"
+

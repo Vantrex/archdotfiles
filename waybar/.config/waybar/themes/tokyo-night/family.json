@@ -1,0 +1,10 @@
+{
+  "id": "tokyo-night",
+  "name": "Tokyo Night",
+  "variants": [
+    { "id": "storm", "label": "Storm", "mode": "dark" },
+    { "id": "night", "label": "Night", "mode": "dark" },
+    { "id": "moon",  "label": "Moon",  "mode": "dark" },
+    { "id": "day",   "label": "Day",   "mode": "light" }
+  ]
+}

@@ -1,0 +1,25 @@
+@keyframes blink {
+    to {
+        color: @wb-comment;
+    }
+}
+
+@keyframes rainbow-border {
+    0%   { border-color: @wb-red;     }
+    16%  { border-color: @wb-orange;  }
+    33%  { border-color: @wb-yellow;  }
+    50%  { border-color: @wb-green;   }
+    66%  { border-color: @wb-cyan;    }
+    83%  { border-color: @wb-blue;    }
+    100% { border-color: @wb-purple;  }
+}
+
+@keyframes rainbow-color {
+    0%   { color: @wb-red;    }
+    16%  { color: @wb-orange; }
+    33%  { color: @wb-yellow; }
+    50%  { color: @wb-green;  }
+    66%  { color: @wb-cyan;   }
+    83%  { color: @wb-blue;   }
+    100% { color: @wb-purple; }
+}

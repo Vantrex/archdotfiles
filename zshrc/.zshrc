@@ -38,7 +38,7 @@ ZSH_THEME="robbyrussell"
 # DISABLE_LS_COLORS="true"
 
 # Uncomment the following line to disable auto-setting terminal title.
-# DISABLE_AUTO_TITLE="true"
+DISABLE_AUTO_TITLE="true"
 
 # Uncomment the following line to enable command auto-correction.
 # ENABLE_CORRECTION="true"
@@ -103,3 +103,39 @@ source $ZSH/oh-my-zsh.sh
 # alias zshconfig="mate ~/.zshrc"
 # alias ohmyzsh="mate ~/.oh-my-zsh"
 export PATH="$HOME/.local/bin:$PATH"
+
+export NVM_DIR="$HOME/.config/nvm"
+[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
+[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
+
+# Added by LM Studio CLI (lms)
+export PATH="$PATH:/home/marinus/.lmstudio/bin"
+# End of LM Studio CLI section
+
+
+# opencode
+export PATH=/home/marinus/.opencode/bin:$PATH
+
+# Set terminal title to "Ghostyy - <directory or command>"
+__set_title() {
+  printf '\e]2;Ghostyy - %s\a' "$1"
+}
+
+update_terminal_title() {
+  __set_title "${PWD/#$HOME/~}"
+}
+
+set_command_title() {
+  if [[ -n "$1" ]]; then
+    __set_title "$1"
+  else
+    __set_title "${PWD/#$HOME/~}"
+  fi
+}
+
+precmd_functions+=(update_terminal_title)
+preexec_functions+=(set_command_title)
+
+export PATH=$PATH:/home/marinus/.spicetify
+export PATH=/opt/cuda/bin:$PATH
+export LD_LIBRARY_PATH=/opt/cuda/lib64:$LD_LIBRARY_PATH

@@ -1,0 +1,31 @@
+{
+  "themeFamily": "tokyo-night",
+  "themeVariant": "moon",
+  "transparency": 0.5,
+  "wallpaperAdaptive": true,
+  "spicetifyAdaptive": true,
+  "adaptiveBlendRatio": 0.85,
+  "features": {
+    "themeSwitcher": true,
+    "hyprlandMode": true,
+    "workspaceAppIcons": true,
+    "rainbowBorder": true,
+    "networkSpeed": true
+  },
+  "modules": {
+    "workspaces": true,
+    "window": true,
+    "mpris": true,
+    "network": true,
+    "pulseaudio": true,
+    "cpu": true,
+    "memory": true,
+    "clock": true,
+    "battery": true,
+    "backlight": true,
+    "notifications": true,
+    "tray": true,
+    "networkSpeed": true,
+    "hyprlandMode": true
+  }
+}

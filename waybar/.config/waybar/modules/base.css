@@ -1,0 +1,19 @@
+* {
+    font-family: "JetBrains Mono Nerd Font";
+    font-weight: bold;
+    font-size: 15px;
+}
+
+window#waybar {
+    /* background-color is set by ~/.cache/waybar/transparency.css */
+    border: none;
+    border-radius: 0px;
+}
+
+tooltip {
+    background: @wb-tooltip-bg;
+    color: @wb-fg;
+    font-size: 13px;
+    border-radius: 7px;
+    border: 2px solid @wb-border;
+}

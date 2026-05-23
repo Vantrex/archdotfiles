@@ -6,9 +6,9 @@
     "layer": "top",
     "position": "top",
     "mod": "dock",
-   "margin-left": 0,
- "margin-right": 0,
- "margin-top": 0,
+   "margin-left": 10,
+ "margin-right": 10,
+ "margin-top": 7,
  "margin-bottom": 0,
     "exclusive": true,
     "passthrough": false,
@@ -18,9 +18,9 @@
 
 // positions generated based on config.ctl //
 
-	"modules-left": ["custom/smallspacer","hyprland/workspaces","custom/active-windows-DP-2","custom/active-windows-DP-3","custom/active-windows-HDMI-A-2","custom/sep","mpris","custom/hyprland-mode"],
+	"modules-left": ["custom/smallspacer","hyprland/workspaces","custom/spacer","mpris"],
 	"modules-center": ["custom/padd","custom/l_end","custom/r_end","hyprland/window","custom/padd"],
-	"modules-right": ["custom/padd","custom/l_end","group/expand","custom/network-speed","network","group/expand-3","group/expand-2","group/expand-4","memory","cpu","custom/waybar-theme","custom/spicetify-adaptive","clock","custom/notification","custom/padd"],
+	"modules-right": ["custom/padd","custom/l_end","group/expand","network","group/expand-3","group/expand-2","group/expand-4","memory","cpu","clock","custom/notification","custom/padd"],
 
 
 // sourced from modules based on config.ctl //
@@ -167,21 +167,10 @@
 "hyprland/workspaces": {
 	"format": "{icon}",
 	"format-icons": {
-		"default": "",
-		"active":  ""
-	},
-	"window-rewrite-default": "",
-	"window-rewrite": {
-		"class<firefox|librewolf|chromium|google-chrome|brave>": "",
-		"class<.*kitty.*|com.mitchellh.ghostty|alacritty|wezterm>": "",
-		"class<code|code-oss|VSCodium>": "󰢞",
-		"class<spotify|Spotify>": "",
-		"class<discord|WebCord|Vesktop>": "󰢯",
-		"class<obsidian>": "",
-		"class<.*[Tt]hunderbird.*>": "󰇮",
-		"class<dolphin|nautilus|thunar|nemo>": "",
-		"class<.*[Tt]elegram.*>": "",
-		"class<.*>": ""
+	"default": "",
+	"active": "",
+	//"default": "○",
+	//"default": "●"
 	},
 },
 
@@ -244,69 +233,15 @@
         "tooltip": true
     },
 
-    "custom/waybar-theme": {
-        "format": "󰃘",
-        "exec": "echo",
-        "on-click": "~/.config/waybar/scripts/theme-switcher.sh",
-        "on-click-right": "~/.config/quickshell/widgets/waybar-config/waybar-config-toggle.sh",
-        "interval": 86400,
-        "tooltip": true,
-        "tooltip-format": "Theme — left-click cycles, right-click opens config"
-    },
-
-    "custom/spicetify-adaptive": {
-        "format": "{}",
-        "return-type": "json",
-        "exec": "~/.config/spicetify/scripts/show-spice-status.sh",
-        "interval": 86400,
-        "on-click": "~/.config/spicetify/scripts/toggle-spice-adaptive.sh && ~/.config/spicetify/scripts/show-spice-status.sh",
-        "tooltip": true,
-        "tooltip-format": "Spotify adaptive colors — click to toggle"
-    },
-
-    "custom/hyprland-mode": {
-        "format": "{}",
-        "return-type": "json",
-        "exec": "~/.config/waybar/scripts/mode-indicator.sh",
-        "interval": 1,
+    "custom/theme": {
+        "format": "{}",
+        "rotate": 0,
+        "exec": "echo ; echo 󰟡 pick color",
+        "on-click": "hyprpicker",
+        "on-click-right": "themeswitch.sh -p",
+        "on-click-middle": "sleep 0.1 && themeselect.sh",
+        "interval" : 86400, // once every day
         "tooltip": true
-    },
-
-    "custom/network-speed": {
-        "format": "{}",
-        "return-type": "json",
-        "exec": "~/.config/waybar/scripts/network-speed.sh",
-        "interval": 2,
-        "tooltip": true
-    },
-
-    "custom/active-windows-DP-2": {
-        "format": "{}",
-        "exec": "~/.config/waybar/scripts/active-windows.sh DP-2",
-        "interval": 1,
-        "tooltip": false,
-        "output": "DP-2"
-    },
-
-    "custom/active-windows-DP-3": {
-        "format": "{}",
-        "exec": "~/.config/waybar/scripts/active-windows.sh DP-3",
-        "interval": 1,
-        "tooltip": false,
-        "output": "DP-3"
-    },
-
-    "custom/active-windows-HDMI-A-2": {
-        "format": "{}",
-        "exec": "~/.config/waybar/scripts/active-windows.sh HDMI-A-2",
-        "interval": 1,
-        "tooltip": false,
-        "output": "HDMI-A-2"
-    },
-
-    "custom/sep": {
-        "format": "│",
-        "tooltip": false
     },
 
     "custom/wallchange": {

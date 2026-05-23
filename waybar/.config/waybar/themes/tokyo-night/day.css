@@ -1,0 +1,18 @@
+/* Tokyo Night — Day (light) */
+@define-color wb-bg          #e1e2e7;
+@define-color wb-bg-dark     #d6d7dc;
+@define-color wb-fg          #3760bf;
+@define-color wb-fg-dark     #2e3440;
+@define-color wb-comment     #9699a3;
+@define-color wb-blue        #2e7de9;
+@define-color wb-green       #519a63;
+@define-color wb-red         #c53b53;
+@define-color wb-purple      #6e59d9;
+@define-color wb-cyan        #0f4b62;
+@define-color wb-yellow      #c49a00;
+@define-color wb-magenta     #a829cf;
+@define-color wb-teal        #336866;
+@define-color wb-orange      #b15c00;
+@define-color wb-border      #c4c4cc;
+@define-color wb-highlight   #b6bfe2;
+@define-color wb-tooltip-bg  #d6d7dc;

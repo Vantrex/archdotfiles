@@ -1,0 +1,46 @@
+#workspaces {
+    background: transparent;
+    color: @wb-comment;
+    box-shadow: none;
+    text-shadow: none;
+    border-radius: 9px;
+    transition: 0.2s ease;
+    padding-left: 4px;
+    padding-right: 4px;
+    padding-top: 1px;
+}
+
+#workspaces button {
+    background: transparent;
+    color: @wb-fg;
+    box-shadow: none;
+    text-shadow: none;
+    border-radius: 9px;
+    transition: 0.2s ease;
+    padding-left: 4px;
+    padding-right: 4px;
+}
+
+#workspaces button.active {
+    color: @wb-fg;
+    transition: all 0.3s ease;
+    padding-left: 4px;
+    padding-right: 4px;
+}
+
+#workspaces button:hover {
+    background: none;
+    color: @wb-green;
+    transition: all 0.5s cubic-bezier(.55,-0.68,.48,1.682);
+}
+
+/* Hide window icons on non-active workspace buttons.
+   waybar renders {icon} as the first label and each window from {windows}
+   as subsequent label children — so we shrink everything past the first. */
+#workspaces button:not(.active) label:not(:first-child) {
+    opacity: 0;
+    font-size: 0;
+    min-width: 0px;
+    padding: 0;
+    margin: 0;
+}

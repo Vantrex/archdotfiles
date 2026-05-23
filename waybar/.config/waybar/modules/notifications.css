@@ -1,0 +1,15 @@
+#custom-notification {
+    font-family: "JetBrains Mono Nerd Font";
+    font-size: 17px;
+    color: @wb-fg;
+    margin: 2px 0px 0px 0px;
+}
+
+#custom-notifications {
+    color: @wb-fg;
+    background: transparent;
+    margin: 0px;
+    padding-left: 1px;
+    padding-right: 1px;
+    opacity: 0.1;
+}
