@@ -67,6 +67,7 @@ declare -A MODULE_SEL=(
     [workspaces]="#workspaces"
     [window]="#window"
     [mpris]="#mpris"
+    [privacy]="#privacy"
     [network]="#network"
     [pulseaudio]="#pulseaudio"
     [cpu]="#cpu"

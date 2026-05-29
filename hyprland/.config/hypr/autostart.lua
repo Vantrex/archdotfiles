@@ -4,7 +4,7 @@ hl.on("hyprland.start", function()
   -- Daemons and utilities (no ordering required).
   hl.exec_cmd("swaync")
   hl.exec_cmd(os.getenv("HOME") .. "/.config/waybar/scripts/settings-apply.sh")
-  hl.exec_cmd("waybar")
+  hl.exec_cmd("waybar 2>/dev/null")
   hl.exec_cmd("awww-daemon")
   hl.exec_cmd("quickshell")
   hl.exec_cmd("wl-paste --type text --watch cliphist store")

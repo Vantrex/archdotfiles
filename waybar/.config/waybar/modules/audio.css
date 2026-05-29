@@ -21,7 +21,7 @@
 #pulseaudio-slider trough {
     margin-top: -3px;
     min-width: 90px;
-    min-height: 10px;
+    min-height: 3px;
     margin-bottom: -4px;
     border-radius: 8px;
     background: @wb-bg-dark;

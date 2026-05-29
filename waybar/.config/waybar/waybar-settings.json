@@ -16,6 +16,7 @@
     "workspaces": true,
     "window": true,
     "mpris": true,
+    "privacy": true,
     "network": true,
     "pulseaudio": true,
     "cpu": true,

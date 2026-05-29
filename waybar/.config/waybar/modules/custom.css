@@ -4,6 +4,34 @@
     opacity: 0.0;
 }
 
+/* Privacy indicators */
+#privacy {
+    color: @wb-fg;
+    background: transparent;
+    padding-left: 6px;
+    padding-right: 6px;
+    margin: 0px;
+    font-size: 15px;
+}
+
+#privacy * {
+    min-width: 0;
+    min-height: 0;
+    font-size: inherit;
+}
+
+#privacy .screen-share {
+    color: @wb-red;
+}
+
+#privacy .screen-record {
+    color: @wb-orange;
+}
+
+#privacy .audio-source {
+    color: @wb-yellow;
+}
+
 #custom-active-windows-DP-2,
 #custom-active-windows-DP-3,
 #custom-active-windows-HDMI-A-2 {

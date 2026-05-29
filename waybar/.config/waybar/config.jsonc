@@ -18,9 +18,9 @@
 
 // positions generated based on config.ctl //
 
-	"modules-left": ["custom/smallspacer","hyprland/workspaces","custom/active-windows-DP-2","custom/active-windows-DP-3","custom/active-windows-HDMI-A-2","custom/sep","mpris","custom/hyprland-mode"],
+	"modules-left": ["custom/smallspacer","hyprland/workspaces","custom/active-windows-DP-2","custom/active-windows-DP-3","custom/active-windows-HDMI-A-2","custom/sep","mpris","privacy","custom/hyprland-mode"],
 	"modules-center": ["custom/padd","custom/l_end","custom/r_end","hyprland/window","custom/padd"],
-	"modules-right": ["custom/padd","custom/l_end","group/expand","custom/network-speed","network","group/expand-3","group/expand-2","group/expand-4","memory","cpu","custom/waybar-theme","custom/spicetify-adaptive","clock","custom/notification","custom/padd"],
+	"modules-right": ["custom/padd","custom/l_end","group/expand","custom/network-speed","network","group/expand-3","group/expand-2","group/expand-4","custom/hyperx-battery","memory","cpu","custom/waybar-theme","custom/spicetify-adaptive","clock","custom/notification","custom/padd"],
 
 
 // sourced from modules based on config.ctl //
@@ -41,23 +41,24 @@
       "on-click-right": "pkill waybar & hyprctl dispatch exec waybar"
 },
 
-"upower#headset": {
-"format": " {percentage}",
-"native-path": "/org/freedesktop/UPower/devices/headset_dev_A6_98_9A_0D_D3_49",
-"show-icon": false,
-"tooltip": false,
-},
-
 "group/expand-4": {
-     "orientation": "horizontal",
-     "drawer": {
-         "transition-duration": 600,
-         "children-class": "not-power",
-       "transition-to-left": true,
-         "click-to-reveal": true
-     },
-     "modules": ["upower","upower/headset"]
-   },
+      "orientation": "horizontal",
+      "drawer": {
+          "transition-duration": 600,
+          "children-class": "not-power",
+        "transition-to-left": true,
+          "click-to-reveal": true
+      },
+      "modules": ["upower"]
+    },
+
+"custom/hyperx-battery": {
+    "format": "{}",
+    "return-type": "json",
+    "exec": "~/.config/waybar/scripts/hyperx-battery.sh",
+    "interval": 30,
+    "tooltip": true
+  },
 
 "custom/smallspacer":{
 "format": " ",
@@ -262,6 +263,18 @@
         "on-click": "~/.config/spicetify/scripts/toggle-spice-adaptive.sh && ~/.config/spicetify/scripts/show-spice-status.sh",
         "tooltip": true,
         "tooltip-format": "Spotify adaptive colors — click to toggle"
+    },
+
+    "privacy": {
+        "icons": {
+            "screen-share": "",
+            "screen-record": "",
+            "audio-source": ""
+        },
+        "show-whenever-active": true,
+        "tooltip-format": "Privacy: {privacy}",
+        "transition-duration": 300,
+        "pause-on-click": true
     },
 
     "custom/hyprland-mode": {

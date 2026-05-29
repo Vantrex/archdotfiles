@@ -20,7 +20,8 @@
 
 #upower,
 #upower#headset,
-#cava {
+#cava,
+#custom-hyperx-battery {
     color: @wb-green;
 }
 
