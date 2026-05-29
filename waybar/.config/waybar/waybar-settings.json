@@ -3,7 +3,7 @@
   "themeVariant": "moon",
   "transparency": 0.5,
   "wallpaperAdaptive": true,
-  "spicetifyAdaptive": true,
+  "spicetifyAdaptive": false,
   "adaptiveBlendRatio": 0.85,
   "features": {
     "themeSwitcher": true,
