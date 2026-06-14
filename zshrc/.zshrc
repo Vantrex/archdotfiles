@@ -115,6 +115,7 @@ export PATH="$PATH:/home/marinus/.lmstudio/bin"
 
 # opencode
 export PATH=/home/marinus/.opencode/bin:$PATH
+export MSGPACKR_NATIVE_ACCELERATION_DISABLED=true
 
 # Set terminal title to "Ghostyy - <directory or command>"
 __set_title() {
