@@ -8,7 +8,8 @@ set -euo pipefail
 CONFIG_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/waybar"
 CACHE_DIR="${XDG_CACHE_HOME:-$HOME/.cache}/waybar"
 SETTINGS="$CONFIG_DIR/waybar-settings.json"
-COLORS="/tmp/qs_colors.json"
+COLORS="/tmp/qs_waybar_colors.json"
+FALLBACK_COLORS="/tmp/qs_colors.json"
 ACTIVE="$CONFIG_DIR/themes/active.css"
 OUT="$CACHE_DIR/adaptive-colors.css"
 
@@ -19,10 +20,10 @@ if [[ ! -f "$SETTINGS" ]]; then
     exit 0
 fi
 
-python3 - "$SETTINGS" "$COLORS" "$ACTIVE" "$OUT" <<'PY'
+python3 - "$SETTINGS" "$COLORS" "$FALLBACK_COLORS" "$ACTIVE" "$OUT" <<'PY'
 import json, os, re, sys
 
-settings_path, colors_path, active_path, out_path = sys.argv[1:5]
+settings_path, colors_path, fallback_colors_path, active_path, out_path = sys.argv[1:6]
 
 with open(settings_path) as f:
     s = json.load(f)
@@ -47,6 +48,9 @@ with open(real_active) as f:
         theme[m.group(1)] = m.group(2)
 
 # Load matugen palette (Catppuccin-style names per MatugenColors.qml)
+if not os.path.isfile(colors_path):
+    colors_path = fallback_colors_path
+
 if not os.path.isfile(colors_path):
     open(out_path, "w").close()
     sys.exit(0)

@@ -20,7 +20,7 @@
 
 	"modules-left": ["custom/smallspacer","hyprland/workspaces","custom/active-windows-DP-2","custom/active-windows-DP-3","custom/active-windows-HDMI-A-2","custom/sep","mpris","privacy","custom/hyprland-mode"],
 	"modules-center": ["custom/padd","custom/l_end","custom/r_end","hyprland/window","custom/padd"],
-	"modules-right": ["custom/padd","custom/l_end","group/expand","custom/network-speed","network","group/expand-3","group/expand-2","group/expand-4","custom/hyperx-battery","memory","cpu","custom/waybar-theme","custom/spicetify-adaptive","clock","custom/notification","custom/padd"],
+	"modules-right": ["custom/padd","custom/l_end","custom/llm-status","group/expand","custom/network-speed","network","group/expand-3","group/expand-2","group/expand-4","custom/hyperx-battery","memory","cpu","custom/waybar-theme","custom/spicetify-adaptive","clock","custom/notification","custom/padd"],
 
 
 // sourced from modules based on config.ctl //
@@ -282,6 +282,15 @@
         "return-type": "json",
         "exec": "~/.config/waybar/scripts/mode-indicator.sh",
         "interval": 1,
+        "tooltip": true
+    },
+
+    "custom/llm-status": {
+        "format": "{}",
+        "return-type": "json",
+        "exec": "~/.config/waybar/scripts/llm-status.sh",
+        "on-click": "~/.config/quickshell/widgets/llm-manager/llm-manager-toggle.sh",
+        "interval": 5,
         "tooltip": true
     },
 

@@ -113,6 +113,11 @@ else
 fi
 [[ -f "$CACHE_DIR/adaptive-colors.css" ]] || : >"$CACHE_DIR/adaptive-colors.css"
 
+# --- apply Hyprland border colors -------------------------------------------
+if [[ -x "$HOME/.config/hypr/scripts/apply-border-colors.sh" ]]; then
+    "$HOME/.config/hypr/scripts/apply-border-colors.sh" || true
+fi
+
 # --- trigger waybar reload --------------------------------------------------
 # Full reload (re-reads config.jsonc + CSS). reload_style_on_change is unreliable
 # across symlinked paths, so signal directly.
