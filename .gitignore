@@ -1,0 +1,7 @@
+/.codegraph/
+__pycache__/
+*.pyc
+*.pyo
+.cache/
+*.tmp
+*.log
