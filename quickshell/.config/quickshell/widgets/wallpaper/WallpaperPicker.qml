@@ -8,7 +8,7 @@ import Quickshell
 import Quickshell.Io
 Item {
     id: window
-    width: Screen.width
+    anchors.fill: parent
 
     // Inline Scaler (WindowRegistry.js not importable in Quickshell)
     property real _baseScale: {
@@ -101,16 +101,31 @@ Item {
     property bool isSearchPaused: false
     property bool hasSearched: false
     property string searchSource: "ddg"
+    property bool pexelsKeyMissing: false
     // "online" → DDG/Pinterest scrape, "offline" → live filter local thumbs by filename
     property string searchMode: "offline"
     property string offlineQuery: ""
     property var colorMap: ({})
     property var categoryMap: ({})
+    property var resolutionMap: ({})
+    property var onlineResolutionMap: ({})
+    property var onlineVideoMap: ({})
     property var _categoryFilters: []
     property int cacheVersion: 0 
     
     property bool isDownloadingWallpaper: false
     property string currentDownloadName: ""
+    property string downloadStatus: ""
+    property bool manualCategoryOpen: false
+    property string pendingDownloadName: ""
+    property var aiSuggestions: []
+    property var aiNameSuggestions: []
+    property string aiSuggestedName: ""
+    property int _dlDotsStep: 0
+    property string lastSavedCategory: ""
+    property string lastSavedName: ""
+    property string _saveConfirmForFile: ""
+    property bool showSaveConfirm: false
     
     property bool isApplying: false
     property bool isMonitorSelectorOpen: false
@@ -151,7 +166,7 @@ Item {
     // Latched ready state: once true it stays true. Prevents the top bar from
     // jumping when FolderListModel.status flickers as new thumbs are added.
     property bool _hasBeenReady: false
-    property bool isReady: visible && (_hasBeenReady || localFolderModel.status === FolderListModel.Ready)
+    property bool isReady: _hasBeenReady || localFolderModel.status === FolderListModel.Ready
     property bool isSearchActive: window.currentFilter === "Search" && window.hasSearched && searchFolderModel.status === FolderListModel.Loading
     
     property string lastSearchName: ""
@@ -241,9 +256,13 @@ Item {
         window.targetWallName = safeFileName;
         let cleanName = window.getCleanName(safeFileName);
         let reloadScript = Qt.resolvedUrl("matugen_reload.sh").toString();
+        let regionScript = Qt.resolvedUrl("generate-region-palettes.sh").toString();
         
         if (reloadScript.startsWith("file://")) {
             reloadScript = decodeURIComponent(reloadScript.substring(7));
+        }
+        if (regionScript.startsWith("file://")) {
+            regionScript = decodeURIComponent(regionScript.substring(7));
         }
 
         const escapeBash = (str) => String(str).replace(/(["\\$`])/g, '\\$1');
@@ -252,81 +271,45 @@ Item {
         
         const logFile = "/tmp/qs_awww_debug.log";
         
-        if (window.currentFilter === "Search" && window.hasSearched) {
-            let alreadyExists = window.isDownloaded(safeFileName);
-            let destFile = window.srcDir + "/" + safeFileName;
-            let finalThumb = decodeURIComponent(window.thumbDir.replace("file://", "")) + "/" + safeFileName;
-            let tempThumb = decodeURIComponent(window.searchDir.replace("file://", "")) + "/" + safeFileName;
-            let mapFile = Quickshell.env("HOME") + "/.cache/wallpaper_picker/search_map.txt";
-
-            if (alreadyExists) {
-                const applyScript = `
-                    export DEST_FILE="${escapeBash(destFile)}"
-                    export FINAL_THUMB="${escapeBash(finalThumb)}"
-                    export RELOAD_SCRIPT="${escapeBash(reloadScript)}"
-                    export TARGET_MONITORS="${escOutputs}"
-                    
-                    cp "$DEST_FILE" /tmp/lock_bg.png || true
-
-                    echo "" >> ${logFile}
-                    echo "[$(date +'%H:%M:%S.%3N')] APPLYING CACHED SEARCH: $DEST_FILE TO $TARGET_MONITORS" >> ${logFile}
-                    
-                    if [ "$TARGET_MONITORS" = "all" ]; then
-                        awww img "$DEST_FILE" --transition-type ${randomTransition} --transition-pos 0.5,0.5 --transition-fps 144 --transition-duration 1 >> ${logFile} 2>&1 &
-                    else
-                        awww img -o "$TARGET_MONITORS" "$DEST_FILE" --transition-type ${randomTransition} --transition-pos 0.5,0.5 --transition-fps 144 --transition-duration 1 >> ${logFile} 2>&1 &
-                    fi
-                    
-                    if [ "${window.applyMatugen}" = "true" ] || [ "${window.applyMatugen}" = "1" ]; then
-                        ( matugen --mode dark --source-color-index 0 image "$FINAL_THUMB" || true; bash "$RELOAD_SCRIPT" || true ) &
-                    fi
-                `;
-                Quickshell.execDetached(["bash", "-c", applyScript]);
-            } else {
-                window.isDownloadingWallpaper = true;
-                window.currentDownloadName = safeFileName;
-
-                const downloadScript = `
-                    export SAFE_NAME="${escapeBash(safeFileName)}"
-                    export DEST_FILE="${escapeBash(destFile)}"
-                    export FINAL_THUMB="${escapeBash(finalThumb)}"
-                    export TEMP_THUMB="${escapeBash(tempThumb)}"
-                    export RELOAD_SCRIPT="${escapeBash(reloadScript)}"
-                    export MAP_FILE="${escapeBash(mapFile)}"
-                    export TARGET_MONITORS="${escOutputs}"
-                    
-                    URL=$(awk -F'|' -v fname="$SAFE_NAME" '$1 == fname {print $2; exit}' "$MAP_FILE")
-                    if [ -n "$URL" ]; then
-                        curl -s -L -A "Mozilla/5.0" "$URL" -o "$DEST_FILE.tmp"
-                        
-                        if file "$DEST_FILE.tmp" | grep -iq "webp"; then
-                            magick "$DEST_FILE.tmp" "$DEST_FILE"
-                            rm -f "$DEST_FILE.tmp"
+        if (window.isWebSearchResult()) {
+            let helper = window.webWallpaperHelper();
+            const applyScript = `
+                export SAFE_NAME="${escapeBash(safeFileName)}"
+                export HELPER="${escapeBash(helper)}"
+                export TARGET_MONITORS="${escOutputs}"
+                export RELOAD_SCRIPT="${escapeBash(reloadScript)}"
+                export REGION_SCRIPT="${escapeBash(regionScript)}"
+                DEST_FILE=$(bash "$HELPER" fetch "$SAFE_NAME") || exit 1
+                echo "" >> ${logFile}
+                echo "[$(date +'%H:%M:%S.%3N')] APPLYING ONLINE: $DEST_FILE TO $TARGET_MONITORS" >> ${logFile}
+                case "$DEST_FILE" in
+                    *.mp4|*.webm|*.mkv|*.mov)
+                        pkill -x mpvpaper 2>/dev/null || true; sleep 0.1
+                        printf '%s\n' "$DEST_FILE" > "$HOME/.cache/wallpaper_picker/last_video_wallpaper.txt"
+                        if [ "$TARGET_MONITORS" = "all" ]; then
+                            mpvpaper -o "--loop-file=inf" '*' "$DEST_FILE" >> ${logFile} 2>&1 &
                         else
-                            mv "$DEST_FILE.tmp" "$DEST_FILE"
+                            mpvpaper -o "--loop-file=inf" "$TARGET_MONITORS" "$DEST_FILE" >> ${logFile} 2>&1 &
                         fi
-                        
-                        cp "$TEMP_THUMB" "$FINAL_THUMB"
-                        magick "$DEST_FILE" -resize x420 -quality 70 "$FINAL_THUMB" || true
-                        
+                        ;;
+                    *)
                         cp "$DEST_FILE" /tmp/lock_bg.png || true
-
-                        echo "" >> ${logFile}
-                        echo "[$(date +'%H:%M:%S.%3N')] APPLYING NEW DOWNLOAD: $DEST_FILE TO $TARGET_MONITORS" >> ${logFile}
-                        
+                        pkill -x mpvpaper 2>/dev/null || true
+                        rm -f "$HOME/.cache/wallpaper_picker/last_video_wallpaper.txt"
                         if [ "$TARGET_MONITORS" = "all" ]; then
                             awww img "$DEST_FILE" --transition-type ${randomTransition} --transition-pos 0.5,0.5 --transition-fps 144 --transition-duration 1 >> ${logFile} 2>&1 &
                         else
                             awww img -o "$TARGET_MONITORS" "$DEST_FILE" --transition-type ${randomTransition} --transition-pos 0.5,0.5 --transition-fps 144 --transition-duration 1 >> ${logFile} 2>&1 &
                         fi
-                        
                         if [ "${window.applyMatugen}" = "true" ] || [ "${window.applyMatugen}" = "1" ]; then
-                            ( matugen --mode dark --source-color-index 0 image "$FINAL_THUMB" || true; bash "$RELOAD_SCRIPT" || true ) &
+                            ( matugen --mode dark --source-color-index 0 image "$DEST_FILE" || true; bash "$REGION_SCRIPT" "$DEST_FILE" || true; bash "$RELOAD_SCRIPT" || true ) &
+                        else
+                            ( bash "$REGION_SCRIPT" "$DEST_FILE" || true; "$HOME/.config/waybar/scripts/wallpaper-adapt.sh" || true ) &
                         fi
-                    fi
-                `;
-                Quickshell.execDetached(["bash", "-c", downloadScript]);
-            }
+                        ;;
+                esac
+            `;
+            Quickshell.execDetached(["bash", "-c", applyScript]);
             if (window.autoCloseOnSelect) Qt.callLater(window.closePanel);
             return;
         }
@@ -338,45 +321,70 @@ Item {
         const escOriginal = escapeBash(originalFile);
         const escThumb = escapeBash(thumbFile);
         const escReload = escapeBash(reloadScript);
+        const escRegion = escapeBash(regionScript);
+        const regionSource = isVideo ? `"${escThumb}"` : '"$ORIG_FILE"';
 
         let wallpaperCmd = "";
         
         if (isVideo) {
-            // awww/swww only handles still images + GIFs. For .mp4/.mkv/.webm/.mov use the
-            // first-frame PNG thumb as a static wallpaper. Install mpvpaper if you want real playback.
-            const lower = String(originalFile).toLowerCase();
-            const isPlayable = lower.endsWith(".gif");
-            const videoSource = isPlayable ? originalFile : thumbFile;
-            const escVideo = escapeBash(videoSource);
+            const escVideo = escapeBash(originalFile);
             wallpaperCmd = `
                 echo "" >> ${logFile}
-                echo "[$(date +'%H:%M:%S.%3N')] APPLYING LOCAL VIDEO (using ${isPlayable ? 'source' : 'thumb'}): ${escVideo} TO ${escOutputs}" >> ${logFile}
-
-                if [ "${escOutputs}" = "all" ]; then
-                    awww img "${escVideo}" --transition-type ${randomTransition} --transition-pos 0.5,0.5 --transition-fps 144 --transition-duration 1 >> ${logFile} 2>&1 &
-                else
-                    awww img -o "${escOutputs}" "${escVideo}" --transition-type ${randomTransition} --transition-pos 0.5,0.5 --transition-fps 144 --transition-duration 1 >> ${logFile} 2>&1 &
-                fi
+                echo "[$(date +'%H:%M:%S.%3N')] APPLYING LOCAL VIDEO: ${escVideo} TO ${escOutputs}" >> ${logFile}
+                case "${escVideo}" in
+                    *.mp4|*.webm|*.mkv|*.mov)
+                        pkill -x mpvpaper 2>/dev/null || true; sleep 0.1
+                        printf '%s\n' "${escVideo}" > "$HOME/.cache/wallpaper_picker/last_video_wallpaper.txt"
+                        if [ "${escOutputs}" = "all" ]; then
+                            mpvpaper -o "--loop-file=inf" '*' "${escVideo}" >> ${logFile} 2>&1 &
+                        else
+                            mpvpaper -o "--loop-file=inf" "${escOutputs}" "${escVideo}" >> ${logFile} 2>&1 &
+                        fi
+                        ;;
+                    *)
+                        pkill -x mpvpaper 2>/dev/null || true
+                        rm -f "$HOME/.cache/wallpaper_picker/last_video_wallpaper.txt"
+                        if [ "${escOutputs}" = "all" ]; then
+                            awww img "${escVideo}" --transition-type ${randomTransition} --transition-pos 0.5,0.5 --transition-fps 144 --transition-duration 1 >> ${logFile} 2>&1 &
+                        else
+                            awww img -o "${escOutputs}" "${escVideo}" --transition-type ${randomTransition} --transition-pos 0.5,0.5 --transition-fps 144 --transition-duration 1 >> ${logFile} 2>&1 &
+                        fi
+                        ;;
+                esac
             `;
         } else {
             wallpaperCmd = `
+                # Fall back to online_full cache if the local path is stale (e.g. after qs restart).
+                ORIG_FILE="${escOriginal}"
+                if [ ! -f "$ORIG_FILE" ]; then
+                    _online="$HOME/.cache/wallpaper_picker/online_full/$(basename "$ORIG_FILE")"
+                    if [ -f "$_online" ]; then
+                        ORIG_FILE="$_online"
+                    else
+                        echo "[$(date +'%H:%M:%S.%3N')] File not found: $ORIG_FILE" >> ${logFile}
+                        exit 1
+                    fi
+                fi
                 echo "" >> ${logFile}
-                echo "[$(date +'%H:%M:%S.%3N')] APPLYING LOCAL IMAGE: ${escOriginal} TO ${escOutputs}" >> ${logFile}
-                
+                echo "[$(date +'%H:%M:%S.%3N')] APPLYING LOCAL IMAGE: $ORIG_FILE TO ${escOutputs}" >> ${logFile}
+                pkill -x mpvpaper 2>/dev/null || true
+                rm -f "$HOME/.cache/wallpaper_picker/last_video_wallpaper.txt"
                 if [ "${escOutputs}" = "all" ]; then
-                    awww img "${escOriginal}" --transition-type ${randomTransition} --transition-pos 0.5,0.5 --transition-fps 144 --transition-duration 1 >> ${logFile} 2>&1 &
+                    awww img "$ORIG_FILE" --transition-type ${randomTransition} --transition-pos 0.5,0.5 --transition-fps 144 --transition-duration 1 >> ${logFile} 2>&1 &
                 else
-                    awww img -o "${escOutputs}" "${escOriginal}" --transition-type ${randomTransition} --transition-pos 0.5,0.5 --transition-fps 144 --transition-duration 1 >> ${logFile} 2>&1 &
+                    awww img -o "${escOutputs}" "$ORIG_FILE" --transition-type ${randomTransition} --transition-pos 0.5,0.5 --transition-fps 144 --transition-duration 1 >> ${logFile} 2>&1 &
                 fi
             `;
         }
 
         const fullScript = `
             cp "${isVideo ? escThumb : escOriginal}" /tmp/lock_bg.png || true
-            
+
             ${wallpaperCmd}
             if [ "${window.applyMatugen}" = "true" ] || [ "${window.applyMatugen}" = "1" ]; then
-                ( matugen --mode dark --source-color-index 0 image "${escThumb}" || true; bash "${escReload}" || true ) &
+                ( matugen --mode dark --source-color-index 0 image "${escThumb}" || true; bash "${escRegion}" ${regionSource} || true; bash "${escReload}" || true ) &
+            else
+                ( bash "${escRegion}" ${regionSource} || true; "$HOME/.config/waybar/scripts/wallpaper-adapt.sh" || true ) &
             fi
         `;
         Quickshell.execDetached(["bash", "-c", fullScript]);
@@ -461,6 +469,130 @@ Item {
     function isDownloaded(name) {
         if (!name) return false;
         return !!window.sourcePathMap[name];
+    }
+
+    function isWebSearchResult() {
+        return window.currentFilter === "Search" && window.searchMode === "online" && window.hasSearched;
+    }
+
+    function isOnlineVideo(name) {
+        let v = window.onlineVideoMap[name];
+        return typeof v === "string" && v.length > 0;
+    }
+
+    function onlineVideoUrl(name) {
+        return window.onlineVideoMap[name] || "";
+    }
+
+    function webWallpaperHelper() {
+        return decodeURIComponent(Qt.resolvedUrl("web_wallpaper.sh").toString().replace(/^file:\/\//, ""));
+    }
+
+    function focusedFileName() {
+        let m = window.activeModel;
+        if (!m || view.currentIndex < 0 || view.currentIndex >= m.count) return "";
+        return String(m.get(view.currentIndex).fileName || "");
+    }
+
+    function focusedResolution() {
+        let name = window.focusedFileName();
+        if (!name) return "";
+        return window.isWebSearchResult() ? (window.onlineResolutionMap[name] || "") : (window.resolutionMap[name] || "");
+    }
+
+    function downloadFocusedWallpaper(category, presetName) {
+        let name = window.pendingDownloadName || window.focusedFileName();
+        if (!name || !window.isWebSearchResult() || webDownloadProc.running) return;
+        window.manualCategoryOpen = false;
+        window.pendingDownloadName = name;
+        window.isDownloadingWallpaper = true;
+        window.downloadStatus = "Preparing download...";
+        window.currentDownloadName = name;
+        let useName = (presetName !== undefined && presetName !== "") ? presetName : (window.aiSuggestedName || "");
+        webDownloadProc.command = ["bash", window.webWallpaperHelper(), "save", name, category || "",
+                                   window.searchQuery, useName, window.searchSource];
+        webDownloadProc.running = true;
+    }
+
+    Process {
+        id: webDownloadProc
+        running: false
+        stdout: StdioCollector {
+            onStreamFinished: {
+                let result = String(this.text || "").trim();
+                if (result.startsWith("AI_SUGGEST|")) {
+                    let parts = result.split("|");
+                    // parts: ["AI_SUGGEST", cat1, ..., "NAMES", name1, ...]
+                    let cats = [], names = [];
+                    let namesIndex = parts.indexOf("NAMES");
+                    if (namesIndex >= 0) {
+                        for (let i = 1; i < namesIndex; i++) cats.push(parts[i]);
+                        for (let i = namesIndex + 1; i < parts.length; i++) names.push(parts[i]);
+                    } else {
+                        // Accept the previous cat1|cat2|cat3|name protocol during upgrades.
+                        for (let i = 1; i < parts.length - 1; i++) cats.push(parts[i]);
+                        names.push(parts[parts.length - 1] || "");
+                    }
+                    window.aiSuggestions = cats;
+                    window.aiNameSuggestions = names;
+                    window.aiSuggestedName = names[0] || "";
+                    window.manualCategoryOpen = true;
+                } else if (result.startsWith("NEED_CATEGORY|")) {
+                    window.aiSuggestions = [];
+                    window.aiNameSuggestions = [];
+                    window.aiSuggestedName = "";
+                    window.manualCategoryOpen = true;
+                } else if (result.startsWith("SAVED|")) {
+                    let parts = result.split("|");
+                    window.lastSavedCategory = parts[1] || "";
+                    window.lastSavedName = parts[2] || "";
+                    window._saveConfirmForFile = window.pendingDownloadName;
+                    window.pendingDownloadName = "";
+                    window.showSaveConfirm = true;
+                    saveConfirmTimer.restart();
+                    window.triggerThumbGeneration();
+                    window.triggerColorExtraction();
+                }
+            }
+        }
+        onExited: {
+            window.isDownloadingWallpaper = false;
+            window.currentDownloadName = "";
+        }
+    }
+
+    Process {
+        id: downloadStatusReader
+        command: ["sh", "-c", "cat \"$HOME/.cache/wallpaper_picker/download_status.txt\" 2>/dev/null || true"]
+        stdout: StdioCollector {
+            onStreamFinished: {
+                let status = String(this.text || "").trim();
+                if (status) window.downloadStatus = status;
+            }
+        }
+    }
+
+    Timer {
+        interval: 500
+        repeat: true
+        running: window.isDownloadingWallpaper
+        triggeredOnStart: true
+        onTriggered: downloadStatusReader.running = true
+    }
+
+    Timer {
+        id: dlDotsTimer
+        interval: 380
+        repeat: true
+        running: window.isDownloadingWallpaper
+        onTriggered: window._dlDotsStep = (window._dlDotsStep + 1) % 4
+    }
+
+    Timer {
+        id: saveConfirmTimer
+        interval: 10000
+        repeat: false
+        onTriggered: window.showSaveConfirm = false
     }
 
     onWidgetArgChanged: {
@@ -994,7 +1126,13 @@ Item {
         enabled: !window.isApplying
         onActivated: {
             // First Esc out of search mode resets the filter; otherwise close the panel.
-            if (searchInput.activeFocus) {
+            if (window.manualCategoryOpen) {
+                window.manualCategoryOpen = false;
+                window.pendingDownloadName = "";
+                window.aiSuggestions = [];
+                window.aiNameSuggestions = [];
+                window.aiSuggestedName = "";
+            } else if (searchInput.activeFocus) {
                 searchInput.focus = false;
                 view.forceActiveFocus();
             } else if (window.currentFilter === "Search") {
@@ -1019,8 +1157,9 @@ Item {
         showDirs: false
         sortField: FolderListModel.Name
         
-        onCountChanged: window.syncLocalModel()
+        onCountChanged: { console.log("[WP] folderModel countChanged:", count); window.syncLocalModel(); }
         onStatusChanged: {
+            console.log("[WP] folderModel statusChanged:", status, "Ready=", FolderListModel.Ready);
             if (status === FolderListModel.Ready) {
                 window._hasBeenReady = true;
                 window.syncLocalModel();
@@ -1144,6 +1283,14 @@ Item {
             window.isItemAnimating = true;
             itemAnimationTimer.restart();
 
+            if (window.showSaveConfirm) {
+                let current = window.focusedFileName();
+                if (current !== "" && current !== window._saveConfirmForFile) {
+                    window.showSaveConfirm = false;
+                    saveConfirmTimer.stop();
+                }
+            }
+
             if (view.model !== searchProxyModel || window.currentFilter !== "Search") return;
             
             if (!window.isModelChanging && window.hasSearched && window.searchIndexRestored) {
@@ -1217,6 +1364,10 @@ Item {
             readonly property bool isVisuallyEnlarged: isCurrent || isFakeSelected
             
             readonly property bool isVideo: safeFileName.startsWith("000_")
+            readonly property bool isGif: safeFileName.toLowerCase().endsWith(".gif")
+            // Direct access so QML tracks onlineVideoMap as a binding dependency.
+            readonly property bool isOnlineVideoItem: !!window.onlineVideoMap[safeFileName]
+            readonly property string onlineVideoPreviewUrl: window.onlineVideoMap[safeFileName] || ""
             readonly property bool matchesFilter: window.checkItemMatchesFilter(safeFileName, isVideo, window.cacheVersion, window.currentFilter)
             
             readonly property real targetWidth: isVisuallyEnlarged ? (window.itemWidth * 1.5) : (window.itemWidth * 0.5)
@@ -1227,11 +1378,11 @@ Item {
             Timer {
                 id: videoPlayTimer
                 interval: 250
-                running: delegateRoot.isVisuallyEnlarged && delegateRoot.isVideo && !window.isScrollingBlocked && !window.isFilterAnimating && !window.isItemAnimating
+                running: delegateRoot.isVisuallyEnlarged && (delegateRoot.isVideo || delegateRoot.isOnlineVideoItem) && !window.isScrollingBlocked && !window.isFilterAnimating && !window.isItemAnimating
                 onTriggered: {
-                    if (delegateRoot.isVisuallyEnlarged && delegateRoot.isVideo) {
+                    if (delegateRoot.isVisuallyEnlarged && (delegateRoot.isVideo || delegateRoot.isOnlineVideoItem)) {
                         delegateRoot.isPlayingVideo = true;
-                        previewPlayer.play();
+                        // autoPlay handles the actual play() call once source is set.
                     }
                 }
             }
@@ -1240,7 +1391,6 @@ Item {
                 if (!isVisuallyEnlarged) {
                     isPlayingVideo = false;
                     videoPlayTimer.stop();
-                    previewPlayer.stop();
                 }
             }
             
@@ -1303,8 +1453,26 @@ Item {
                         width: (window.itemWidth * 1.5) + ((window.itemHeight + window.s(30)) * Math.abs(window.skewFactor)) + window.s(50)
                         height: window.itemHeight + window.s(30)
                         fillMode: Image.PreserveAspectCrop
-                        source: fileUrl !== undefined ? fileUrl : ""
+                        source: (!delegateRoot.isGif && fileUrl !== undefined) ? fileUrl : ""
                         asynchronous: true
+                        visible: !delegateRoot.isGif
+
+                        transform: Matrix4x4 {
+                            property real s: -window.skewFactor
+                            matrix: Qt.matrix4x4(1, s, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1)
+                        }
+                    }
+
+                    AnimatedImage {
+                        anchors.centerIn: parent
+                        anchors.horizontalCenterOffset: window.s(-50)
+                        width: (window.itemWidth * 1.5) + ((window.itemHeight + window.s(30)) * Math.abs(window.skewFactor)) + window.s(50)
+                        height: window.itemHeight + window.s(30)
+                        fillMode: Image.PreserveAspectCrop
+                        source: (delegateRoot.isGif && fileUrl !== undefined) ? fileUrl : ""
+                        asynchronous: true
+                        visible: delegateRoot.isGif
+                        playing: delegateRoot.isGif
 
                         transform: Matrix4x4 {
                             property real s: -window.skewFactor
@@ -1312,9 +1480,31 @@ Item {
                         }
                     }
                     
+                    // Play indicator for online video results (moewalls etc.)
+                    Rectangle {
+                        visible: window.isWebSearchResult() && window.isOnlineVideo(delegateRoot.safeFileName)
+                        anchors.bottom: parent.bottom
+                        anchors.right: parent.right
+                        anchors.margins: window.s(6)
+                        width: window.s(26)
+                        height: window.s(18)
+                        radius: window.s(4)
+                        color: Qt.rgba(0, 0, 0, 0.55)
+                        Text {
+                            anchors.centerIn: parent
+                            text: "▶"
+                            color: "white"
+                            font.pixelSize: window.s(9)
+                        }
+                    }
+
                     MediaPlayer {
                         id: previewPlayer
-                        source: delegateRoot.isPlayingVideo ? "file://" + window.srcDir + "/" + window.getCleanName(delegateRoot.safeFileName) : ""
+                        autoPlay: true
+                        source: delegateRoot.isPlayingVideo ? (
+                            delegateRoot.isOnlineVideoItem ? delegateRoot.onlineVideoPreviewUrl
+                            : "file://" + window.srcDir + "/" + window.getCleanName(delegateRoot.safeFileName)
+                        ) : ""
                         audioOutput: AudioOutput { muted: true }
                         videoOutput: previewOutput
                         loops: MediaPlayer.Infinite
@@ -1336,7 +1526,7 @@ Item {
                     }
                     
                     Rectangle {
-                        visible: delegateRoot.isVideo && (!delegateRoot.isPlayingVideo || previewPlayer.playbackState !== MediaPlayer.PlayingState)
+                        visible: (delegateRoot.isVideo || delegateRoot.isOnlineVideoItem) && (!delegateRoot.isPlayingVideo || previewPlayer.playbackState !== MediaPlayer.PlayingState)
                         anchors.top: parent.top
                         anchors.right: parent.right
                         anchors.margins: window.s(10)
@@ -1426,7 +1616,21 @@ Item {
         }
     }
 
-    // Name of the currently focused wallpaper, shown below the carousel.
+    Text {
+        id: focusedResolutionLabel
+        anchors.bottom: parent.bottom
+        anchors.bottomMargin: window.s(52)
+        anchors.horizontalCenter: parent.horizontalCenter
+        z: 14
+        opacity: text !== "" ? 0.18 : 0.0
+        color: _theme.text
+        font.family: "JetBrains Mono"
+        font.pixelSize: window.s(34)
+        font.bold: true
+        text: window.focusedResolution()
+    }
+
+    // Name of the currently focused wallpaper, shown over its muted resolution.
     Text {
         id: focusedNameLabel
         anchors.bottom: parent.bottom
@@ -1452,6 +1656,446 @@ Item {
             let dot = clean.lastIndexOf(".");
             if (dot > 0) clean = clean.substring(0, dot);
             return clean;
+        }
+    }
+
+    Rectangle {
+        id: webDownloadButton
+        anchors.bottom: parent.bottom
+        anchors.bottomMargin: window.s(16)
+        anchors.horizontalCenter: parent.horizontalCenter
+        z: 16
+        visible: window.isWebSearchResult() && window.focusedFileName() !== ""
+        width: window.isDownloadingWallpaper ? Math.max(window.s(200), downloadButtonText.implicitWidth + window.s(32)) : window.s(126)
+        height: window.s(34)
+        radius: window.s(9)
+        color: downloadMouse.containsMouse ? _theme.surface2 : _theme.surface1
+        border.color: _theme.text
+        border.width: 1
+
+        Behavior on width { NumberAnimation { duration: 200; easing.type: Easing.OutQuad } }
+
+        SequentialAnimation on opacity {
+            running: window.isDownloadingWallpaper
+            loops: Animation.Infinite
+            NumberAnimation { to: 0.45; duration: 700; easing.type: Easing.InOutSine }
+            NumberAnimation { to: 1.0;  duration: 700; easing.type: Easing.InOutSine }
+            onStopped: webDownloadButton.opacity = 1.0
+        }
+
+        Text {
+            id: downloadButtonText
+            anchors.centerIn: parent
+            color: _theme.text
+            font.family: "JetBrains Mono"
+            font.pixelSize: window.s(13)
+            font.bold: true
+            text: {
+                if (!window.isDownloadingWallpaper) return "Download";
+                let base = window.downloadStatus.replace(/\.+$/, "");
+                let dots = ["", ".", "..", "..."][window._dlDotsStep];
+                return base + dots;
+            }
+        }
+
+        MouseArea {
+            id: downloadMouse
+            anchors.fill: parent
+            hoverEnabled: true
+            enabled: !window.isDownloadingWallpaper
+            cursorShape: Qt.PointingHandCursor
+            onClicked: window.downloadFocusedWallpaper("")
+        }
+    }
+
+    Rectangle {
+        id: saveConfirmBadge
+        anchors.bottom: parent.bottom
+        anchors.bottomMargin: window.s(58)
+        anchors.horizontalCenter: parent.horizontalCenter
+        z: 16
+        visible: opacity > 0
+        opacity: window.showSaveConfirm ? 1.0 : 0.0
+        Behavior on opacity { NumberAnimation { duration: 350; easing.type: Easing.OutQuad } }
+        width: saveConfirmText.implicitWidth + window.s(24)
+        height: window.s(30)
+        radius: window.s(8)
+        color: _theme.surface1
+        border.color: _theme.green
+        border.width: 1
+
+        Text {
+            id: saveConfirmText
+            anchors.centerIn: parent
+            color: _theme.green
+            font.family: "JetBrains Mono"
+            font.pixelSize: window.s(12)
+            text: "✓  " + window.lastSavedCategory + " / " + window.lastSavedName
+        }
+    }
+
+    Rectangle {
+        id: pexelsNoKeyBanner
+        anchors.centerIn: parent
+        z: 10001
+        visible: window.pexelsKeyMissing && window.searchSource === "pexels"
+        width: Math.min(window.s(560), window.width - window.s(80))
+        height: window.s(130)
+        radius: window.s(14)
+        color: _theme.crust
+        border.color: _theme.peach
+        border.width: 1
+
+        Column {
+            anchors.centerIn: parent
+            spacing: window.s(10)
+            width: parent.width - window.s(36)
+
+            Text {
+                width: parent.width
+                text: "Pexels API key required"
+                color: _theme.peach
+                font.family: "JetBrains Mono"
+                font.pixelSize: window.s(15)
+                font.bold: true
+                horizontalAlignment: Text.AlignHCenter
+            }
+            Text {
+                width: parent.width
+                text: "Get a free key at pexels.com/api\nthen save it to:\n~/.config/wallpaper-picker/pexels_api_key"
+                color: _theme.subtext0
+                font.family: "JetBrains Mono"
+                font.pixelSize: window.s(11)
+                horizontalAlignment: Text.AlignHCenter
+                wrapMode: Text.WordWrap
+            }
+        }
+
+        MouseArea {
+            anchors.fill: parent
+            onClicked: window.pexelsKeyMissing = false
+        }
+    }
+
+    Rectangle {
+        id: manualCategoryDialog
+        anchors.centerIn: parent
+        z: 10000
+        visible: window.manualCategoryOpen
+        width: Math.min(window.s(780), window.width - window.s(80))
+        height: window.s(window.aiSuggestions.length > 0 ? 590 : 450)
+        radius: window.s(16)
+        color: _theme.crust
+        border.color: _theme.surface2
+        border.width: 1
+
+        onVisibleChanged: {
+            if (visible) {
+                filenameInput.text = window.aiSuggestedName;
+                newCategoryInput.text = "";
+                filenameInput.forceActiveFocus();
+            }
+        }
+
+        Column {
+            anchors.fill: parent
+            anchors.margins: window.s(18)
+            spacing: window.s(10)
+
+            Text {
+                text: "Choose a category"
+                color: _theme.text
+                font.family: "JetBrains Mono"
+                font.pixelSize: window.s(18)
+                font.bold: true
+            }
+
+            // ── AI suggestions ──────────────────────────────────────────
+            Column {
+                visible: window.aiSuggestions.length > 0
+                width: parent.width
+                spacing: window.s(6)
+
+                Text {
+                    text: "AI suggests:"
+                    color: _theme.green
+                    font.family: "JetBrains Mono"
+                    font.pixelSize: window.s(11)
+                    font.bold: true
+                }
+
+                Flickable {
+                    width: parent.width
+                    height: window.s(36)
+                    contentWidth: aiCategorySuggestionRow.width
+                    clip: true
+                    boundsBehavior: Flickable.StopAtBounds
+
+                    Row {
+                        id: aiCategorySuggestionRow
+                        spacing: window.s(8)
+                        Repeater {
+                            model: window.aiSuggestions
+                            delegate: Rectangle {
+                                width: aiSuggestText.implicitWidth + window.s(24)
+                                height: window.s(36)
+                                radius: window.s(9)
+                                color: aiSuggestMouse.containsMouse ? _theme.green : Qt.rgba(_theme.green.r, _theme.green.g, _theme.green.b, 0.18)
+                                border.color: _theme.green
+                                border.width: 1
+                                Text {
+                                    id: aiSuggestText
+                                    anchors.centerIn: parent
+                                    text: modelData
+                                    color: aiSuggestMouse.containsMouse ? _theme.base : _theme.green
+                                    font.family: "JetBrains Mono"
+                                    font.pixelSize: window.s(13)
+                                    font.bold: true
+                                }
+                                MouseArea {
+                                    id: aiSuggestMouse
+                                    anchors.fill: parent
+                                    hoverEnabled: true
+                                    cursorShape: Qt.PointingHandCursor
+                                    onClicked: window.downloadFocusedWallpaper(modelData, filenameInput.text.trim())
+                                }
+                            }
+                        }
+                    }
+                }
+
+                Text {
+                    text: "AI filenames:"
+                    color: _theme.green
+                    font.family: "JetBrains Mono"
+                    font.pixelSize: window.s(11)
+                    font.bold: true
+                }
+
+                Flickable {
+                    width: parent.width
+                    height: window.s(30)
+                    contentWidth: aiNameSuggestionRow.width
+                    clip: true
+                    boundsBehavior: Flickable.StopAtBounds
+
+                    Row {
+                        id: aiNameSuggestionRow
+                        spacing: window.s(8)
+                        Repeater {
+                            model: window.aiNameSuggestions
+                            delegate: Rectangle {
+                                width: aiNameSuggestText.implicitWidth + window.s(20)
+                                height: window.s(30)
+                                radius: window.s(7)
+                                color: aiNameSuggestMouse.containsMouse ? _theme.green : Qt.rgba(_theme.green.r, _theme.green.g, _theme.green.b, 0.18)
+                                border.color: _theme.green
+                                border.width: 1
+                                Text {
+                                    id: aiNameSuggestText
+                                    anchors.centerIn: parent
+                                    text: modelData
+                                    color: aiNameSuggestMouse.containsMouse ? _theme.base : _theme.green
+                                    font.family: "JetBrains Mono"
+                                    font.pixelSize: window.s(11)
+                                }
+                                MouseArea {
+                                    id: aiNameSuggestMouse
+                                    anchors.fill: parent
+                                    hoverEnabled: true
+                                    cursorShape: Qt.PointingHandCursor
+                                    onClicked: filenameInput.text = modelData
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            // ── All categories ───────────────────────────────────────────
+            Text {
+                text: window.aiSuggestions.length > 0 ? "or pick another:" : "choose a category:"
+                color: _theme.subtext0
+                font.family: "JetBrains Mono"
+                font.pixelSize: window.s(11)
+            }
+
+            Flickable {
+                width: parent.width
+                height: window.s(130)
+                contentHeight: categoryFlow.height
+                clip: true
+                boundsBehavior: Flickable.StopAtBounds
+
+                Flow {
+                    id: categoryFlow
+                    width: parent.width
+                    spacing: window.s(7)
+
+                    Repeater {
+                        model: window._categoryFilters
+                        delegate: Rectangle {
+                            width: categoryChoiceText.implicitWidth + window.s(20)
+                            height: window.s(30)
+                            radius: window.s(7)
+                            color: categoryChoiceMouse.containsMouse ? _theme.surface2 : _theme.surface1
+                            border.color: _theme.overlay0
+                            border.width: 1
+
+                            Text {
+                                id: categoryChoiceText
+                                anchors.centerIn: parent
+                                text: modelData
+                                color: _theme.text
+                                font.family: "JetBrains Mono"
+                                font.pixelSize: window.s(11)
+                            }
+
+                            MouseArea {
+                                id: categoryChoiceMouse
+                                anchors.fill: parent
+                                hoverEnabled: true
+                                cursorShape: Qt.PointingHandCursor
+                                onClicked: window.downloadFocusedWallpaper(modelData, filenameInput.text.trim())
+                            }
+                        }
+                    }
+                }
+            }
+
+            // ── Filename (shared, editable) ───────────────────────────────
+            Text {
+                text: "filename:"
+                color: _theme.subtext0
+                font.family: "JetBrains Mono"
+                font.pixelSize: window.s(11)
+            }
+
+            Rectangle {
+                width: parent.width
+                height: window.s(34)
+                radius: window.s(8)
+                color: _theme.surface0
+                border.color: filenameInput.activeFocus ? _theme.text : _theme.overlay0
+                border.width: 1
+
+                Text {
+                    anchors.left: parent.left
+                    anchors.right: parent.right
+                    anchors.leftMargin: window.s(10)
+                    anchors.rightMargin: window.s(10)
+                    anchors.verticalCenter: parent.verticalCenter
+                    visible: filenameInput.text.length === 0
+                    text: "leave empty to keep original name"
+                    color: _theme.overlay0
+                    font.family: "JetBrains Mono"
+                    font.pixelSize: window.s(13)
+                    elide: Text.ElideRight
+                }
+
+                TextInput {
+                    id: filenameInput
+                    anchors.left: parent.left
+                    anchors.right: parent.right
+                    anchors.leftMargin: window.s(10)
+                    anchors.rightMargin: window.s(10)
+                    anchors.verticalCenter: parent.verticalCenter
+                    color: _theme.text
+                    font.family: "JetBrains Mono"
+                    font.pixelSize: window.s(13)
+                    clip: true
+                    selectByMouse: true
+                }
+            }
+
+            // ── New category input ────────────────────────────────────────
+            Text {
+                text: "or create new category:"
+                color: _theme.subtext0
+                font.family: "JetBrains Mono"
+                font.pixelSize: window.s(11)
+            }
+
+            Row {
+                width: parent.width
+                spacing: window.s(8)
+
+                Rectangle {
+                    width: parent.width - newCategoryBtn.width - window.s(8)
+                    height: window.s(34)
+                    radius: window.s(8)
+                    color: _theme.surface0
+                    border.color: newCategoryInput.activeFocus ? _theme.text : _theme.overlay0
+                    border.width: 1
+
+                    TextInput {
+                        id: newCategoryInput
+                        anchors.left: parent.left
+                        anchors.right: parent.right
+                        anchors.leftMargin: window.s(10)
+                        anchors.rightMargin: window.s(10)
+                        anchors.verticalCenter: parent.verticalCenter
+                        color: _theme.text
+                        font.family: "JetBrains Mono"
+                        font.pixelSize: window.s(13)
+                        clip: true
+                        selectByMouse: true
+                        Keys.onReturnPressed: {
+                            let cat = newCategoryInput.text.trim();
+                            if (cat.length > 0) window.downloadFocusedWallpaper(cat, filenameInput.text.trim());
+                        }
+                    }
+                }
+
+                Rectangle {
+                    id: newCategoryBtn
+                    width: window.s(70)
+                    height: window.s(34)
+                    radius: window.s(8)
+                    color: newCatBtnMouse.containsMouse ? _theme.surface2 : _theme.surface1
+                    border.color: _theme.text
+                    border.width: 1
+
+                    Text {
+                        anchors.centerIn: parent
+                        text: "Save"
+                        color: _theme.text
+                        font.family: "JetBrains Mono"
+                        font.pixelSize: window.s(12)
+                        font.bold: true
+                    }
+
+                    MouseArea {
+                        id: newCatBtnMouse
+                        anchors.fill: parent
+                        hoverEnabled: true
+                        cursorShape: Qt.PointingHandCursor
+                        onClicked: {
+                            let cat = newCategoryInput.text.trim();
+                            if (cat.length > 0) window.downloadFocusedWallpaper(cat, filenameInput.text.trim());
+                        }
+                    }
+                }
+            }
+
+            Text {
+                text: "Cancel"
+                color: _theme.subtext0
+                font.family: "JetBrains Mono"
+                font.pixelSize: window.s(12)
+
+                MouseArea {
+                    anchors.fill: parent
+                    cursorShape: Qt.PointingHandCursor
+                    onClicked: {
+                        window.manualCategoryOpen = false;
+                        window.pendingDownloadName = "";
+                        window.aiSuggestions = [];
+                        window.aiNameSuggestions = [];
+                        window.aiSuggestedName = "";
+                    }
+                }
+            }
         }
     }
 
@@ -1934,14 +2578,20 @@ Item {
                     enabled: !window.isApplying
                     cursorShape: Qt.PointingHandCursor
                     onClicked: {
-                        window.searchSource = window.searchSource === "ddg" ? "pinterest" : "ddg";
+                        let sources = ["ddg", "pinterest", "moewalls", "pexels"];
+                        let idx = sources.indexOf(window.searchSource);
+                        window.searchSource = sources[(idx + 1) % sources.length];
+                        window.pexelsKeyMissing = false;
                     }
-                    onContainsMouseChanged: containsMouse
-                        ? window.showTooltip(searchSourceBtn, "Online source: " + (window.searchSource === "ddg" ? "DuckDuckGo" : "Pinterest") + " (click to swap)")
-                        : window.hideTooltip(searchSourceBtn)
+                    onContainsMouseChanged: {
+                        let names = { ddg: "DuckDuckGo", pinterest: "Pinterest", moewalls: "MoeWalls (anime video)", pexels: "Pexels (video)" };
+                        containsMouse
+                            ? window.showTooltip(searchSourceBtn, "Online source: " + (names[window.searchSource] || window.searchSource) + " (click to cycle)")
+                            : window.hideTooltip(searchSourceBtn);
+                    }
                 }
                 Text {
-                    text: window.searchSource === "ddg" ? "DDG" : "PT"
+                    text: ({ ddg: "DDG", pinterest: "PT", moewalls: "MW", pexels: "PX" })[window.searchSource] || window.searchSource.toUpperCase()
                     anchors.centerIn: parent
                     color: _theme.peach
                     font.family: "JetBrains Mono"
@@ -2277,6 +2927,7 @@ Item {
     Component.onCompleted: {
         Quickshell.execDetached(["bash", "-c", "mkdir -p '" + decodeURIComponent(window.searchDir.replace("file://", "")) + "'"]);
 
+        console.log("[WP] onCompleted: thumbDir=", window.thumbDir, "folderStatus=", localFolderModel.status, "isReady=", window.isReady, "_hasBeenReady=", window._hasBeenReady);
         window.loadMonitors();
         window.applyMatugen = searchState.matugenEnabled || false;
 
@@ -2312,7 +2963,7 @@ Item {
             : > "$MAP_TMP"
 
             # Images: WebP thumbs are converted to PNG (Qt may lack the WebP plugin).
-            find "$SRC_DIR" -type f \\( -iname '*.jpg' -o -iname '*.jpeg' -o -iname '*.png' -o -iname '*.webp' -o -iname '*.gif' \\) | while read -r src; do
+            find "$SRC_DIR" -path "$SRC_DIR/.*" -prune -o -type f \\( -iname '*.jpg' -o -iname '*.jpeg' -o -iname '*.png' -o -iname '*.webp' -o -iname '*.gif' \\) -print | while read -r src; do
                 base=$(basename "$src")
                 case "$base" in
                     *.webp|*.WEBP) thumb_name="\${base%.*}.png" ;;
@@ -2324,11 +2975,12 @@ Item {
                 if [ ! -f "$THUMB_DIR/$thumb_name" ]; then
                     magick "$src" -resize x420 -quality 85 "$THUMB_DIR/$thumb_name" 2>/dev/null || true
                 fi
-                printf '%s|%s|%s\\n' "$thumb_name" "$src" "$category" >> "$MAP_TMP"
+                dimensions=$(magick identify -format '%wx%h' "$src[0]" 2>/dev/null || true)
+                printf '%s|%s|%s|%s\\n' "$thumb_name" "$src" "$category" "$dimensions" >> "$MAP_TMP"
             done
 
             # Videos: thumbs are PNG previews prefixed with 000_.
-            find "$SRC_DIR" -type f \\( -iname '*.mp4' -o -iname '*.mkv' -o -iname '*.mov' -o -iname '*.webm' \\) | while read -r src; do
+            find "$SRC_DIR" -path "$SRC_DIR/.*" -prune -o -type f \\( -iname '*.mp4' -o -iname '*.mkv' -o -iname '*.mov' -o -iname '*.webm' \\) -print | while read -r src; do
                 base=$(basename "$src")
                 thumb_name="000_\${base%.*}.png"
                 rel="\${src#$SRC_DIR/}"
@@ -2337,7 +2989,8 @@ Item {
                 if [ ! -f "$THUMB_DIR/$thumb_name" ]; then
                     magick "$src[0]" -resize x420 -quality 85 "$THUMB_DIR/$thumb_name" 2>/dev/null || true
                 fi
-                printf '%s|%s|%s\\n' "$thumb_name" "$src" "$category" >> "$MAP_TMP"
+                dimensions=$(magick identify -format '%wx%h' "$src[0]" 2>/dev/null || true)
+                printf '%s|%s|%s|%s\\n' "$thumb_name" "$src" "$category" "$dimensions" >> "$MAP_TMP"
             done
 
             mv "$MAP_TMP" "$MAP_FILE"
@@ -2356,6 +3009,7 @@ Item {
                 window._lastPathMapRaw = txt;
                 let pathMap = {};
                 let catMap = {};
+                let dimensions = {};
                 let cats = {};
                 let lines = txt.split("\n");
                 for (let i = 0; i < lines.length; i++) {
@@ -2366,7 +3020,9 @@ Item {
                     let thumb = parts[0];
                     let src = parts[1];
                     let cat = parts[2];
+                    let resolution = parts[3] || "";
                     pathMap[thumb] = src;
+                    if (resolution) dimensions[thumb] = resolution;
                     if (cat) {
                         catMap[thumb] = cat;
                         cats[cat] = true;
@@ -2374,6 +3030,7 @@ Item {
                 }
                 window.sourcePathMap = pathMap;
                 window.categoryMap = catMap;
+                window.resolutionMap = dimensions;
                 let catList = [];
                 for (let k in cats) catList.push(k);
                 catList.sort();
@@ -2386,13 +3043,50 @@ Item {
     property string _lastPathMapRaw: ""
     property var sourcePathMap: ({})
 
+    Process {
+        id: onlineMetadataReader
+        command: ["sh", "-c", "cat \"$HOME/.cache/wallpaper_picker/search_map.txt\" \"$HOME/.cache/wallpaper_picker/online_dimensions.txt\" 2>/dev/null || true"]
+        stdout: StdioCollector {
+            onStreamFinished: {
+                let dimensions = {};
+                let videos = {};
+                let lines = String(this.text || "").split("\n");
+                for (let line of lines) {
+                    if (!line) continue;
+                    let parts = line.split("|");
+                    if (parts.length >= 3 && parts[2]) dimensions[parts[0]] = parts[2];
+                    if (parts.length === 2 && parts[1]) dimensions[parts[0]] = parts[1];
+                    // Store the video URL so the delegate can stream it for preview.
+                    if (parts.length >= 4 && parts[3] === "video") videos[parts[0]] = parts[1];
+                }
+                window.onlineResolutionMap = dimensions;
+                window.onlineVideoMap = videos;
+            }
+        }
+    }
+
     Timer {
         id: pathMapTimer
         interval: 2000
         running: true
         repeat: true
         triggeredOnStart: true
-        onTriggered: pathMapReader.running = true
+        onTriggered: {
+            pathMapReader.running = true;
+            onlineMetadataReader.running = true;
+            pexelsStatusReader.running = true;
+        }
+    }
+
+    Process {
+        id: pexelsStatusReader
+        command: ["sh", "-c", "cat \"$HOME/.cache/wallpaper_picker/pexels_status.txt\" 2>/dev/null || true"]
+        stdout: StdioCollector {
+            onStreamFinished: {
+                let s = String(this.text || "").trim();
+                if (s === "PEXELS_NO_KEY") window.pexelsKeyMissing = true;
+            }
+        }
     }
 
     Component.onDestruction: {

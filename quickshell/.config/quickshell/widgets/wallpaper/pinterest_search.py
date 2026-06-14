@@ -83,7 +83,7 @@ def main():
                     full_url = decoded
 
                 try:
-                    sys.stdout.write(f"{thumb_url}|{full_url}\n")
+                    sys.stdout.write(f"{thumb_url}|{full_url}||\n")
                     sys.stdout.flush()
                     links_found += 1
                 except BrokenPipeError:

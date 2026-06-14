@@ -108,16 +108,20 @@ def main():
             for res in results:
                 width = int(res.get("width", 0))
                 height = int(res.get("height", 0))
-                if width >= 1920 and height >= 1080:
-                    t, i = res.get("thumbnail"), res.get("image")
-                    if t and i:
-                        try:
-                            sys.stdout.write(f"{t}|{i}\n")
-                            sys.stdout.flush()
-                            links_found += 1
-                        except BrokenPipeError:
-                            log("Broken pipe detected. Bash script stopped listening. Exiting.")
-                            os._exit(0)
+                t, i = res.get("thumbnail"), res.get("image")
+                if not (t and i):
+                    continue
+                is_gif = str(i).lower().split("?")[0].endswith(".gif")
+                # GIFs are rarely FHD — accept anything reasonable; keep FHD+ for stills.
+                min_w, min_h = (320, 240) if is_gif else (1920, 1080)
+                if width >= min_w and height >= min_h:
+                    try:
+                        sys.stdout.write(f"{t}|{i}|{width}|{height}\n")
+                        sys.stdout.flush()
+                        links_found += 1
+                    except BrokenPipeError:
+                        log("Broken pipe detected. Bash script stopped listening. Exiting.")
+                        os._exit(0)
 
             next_url = data.get("next")
             if not next_url:

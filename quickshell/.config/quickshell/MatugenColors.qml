@@ -29,11 +29,13 @@ Item {
     property color maroon: "#eba0ac"
     property color teal: "#94e2d5"
 
+    property string sourceFile: "/tmp/qs_colors.json"
+    property string fallbackFile: "/tmp/qs_colors.json"
     property string rawJson: ""
 
     Process {
         id: themeReader
-        command: ["cat", "/tmp/qs_colors.json"]
+        command: ["sh", "-c", "cat \"$1\" 2>/dev/null || cat \"$2\" 2>/dev/null || true", "sh", root.sourceFile, root.fallbackFile]
         stdout: StdioCollector {
             onStreamFinished: {
                 let txt = this.text.trim();

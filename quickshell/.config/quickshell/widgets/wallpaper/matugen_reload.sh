@@ -1,5 +1,10 @@
 #!/usr/bin/env bash
 
+# Apply Hyprland border colors from Nord + matugen blend
+if [[ -x "$HOME/.config/hypr/scripts/apply-border-colors.sh" ]]; then
+    "$HOME/.config/hypr/scripts/apply-border-colors.sh" 2>/dev/null || true
+fi
+
 # Reload Kitty instances
 if command -v kitty &> /dev/null; then
     killall -USR1 .kitty-wrapped 2>/dev/null || true

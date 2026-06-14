@@ -79,6 +79,9 @@ Item {
         Quickshell.execDetached([themeSetScript, family, variant]);
         refreshTimer.restart();
     }
+    function applyBorders() {
+        Quickshell.execDetached([home + "/.config/hypr/scripts/apply-border-colors.sh"]);
+    }
 
     Component.onCompleted: {
         settingsReader.running = true;
@@ -117,7 +120,7 @@ Item {
         id: card
         anchors.centerIn: parent
         width: 580
-        height: Math.min(parent.height - 40, 760)
+        height: Math.min(parent.height - 40, 840)
         color: root.cBg
         border.color: root.cBorder
         border.width: 2
@@ -135,7 +138,7 @@ Item {
             RowLayout {
                 Layout.fillWidth: true
                 Text {
-                    text: "Waybar Settings"
+                    text: "Style Settings"
                     color: root.cFg
                     font.pixelSize: 22
                     font.bold: true
@@ -234,6 +237,45 @@ Item {
                         label: "Adapt Spotify colors to wallpaper"
                         active: !!root.settings.spicetifyAdaptive
                         onToggled: root.mutate("spicetifyAdaptive", v)
+                    }
+
+                    // ---- Window Borders
+                    SectionHeader { text: "Window Borders" }
+                    Toggle {
+                        label: "Blend borders with wallpaper colors"
+                        active: !!root.settings.borderAdaptive
+                        onToggled: root.mutate("borderAdaptive", v)
+                    }
+                    Toggle {
+                        label: "Vibrant (bright Nord blue)"
+                        active: !!root.settings.borderVibrant
+                        interactive: !!root.settings.borderAdaptive
+                        onToggled: root.mutate("borderVibrant", v)
+                    }
+                    Toggle {
+                        label: "Wallpaper dominance"
+                        active: !!root.settings.borderWallpaperDominance
+                        interactive: !!root.settings.borderAdaptive
+                        onToggled: root.mutate("borderWallpaperDominance", v)
+                    }
+                    LabeledSlider {
+                        label: "Border blend ratio"
+                        value: root.settings.borderBlendRatio !== undefined ? root.settings.borderBlendRatio : 0.3
+                        from: 0.0; to: 1.0; step: 0.05
+                        interactive: !!root.settings.borderAdaptive && !!root.settings.borderWallpaperDominance
+                        onCommitted: root.mutate("borderBlendRatio", v)
+                    }
+                    Toggle {
+                        label: "Gradient border"
+                        active: root.settings.borderGradient !== false
+                        interactive: !!root.settings.borderAdaptive
+                        onToggled: root.mutate("borderGradient", v)
+                    }
+                    Toggle {
+                        label: "Adapt inactive border"
+                        active: !!root.settings.borderInactiveAdapt
+                        interactive: !!root.settings.borderAdaptive
+                        onToggled: root.mutate("borderInactiveAdapt", v)
                     }
 
                     // ---- Features
