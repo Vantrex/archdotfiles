@@ -5,7 +5,8 @@ hl.bind("SUPER + RETURN", hl.dsp.exec_cmd(programs.terminal))
 hl.bind("SUPER + B", hl.dsp.exec_cmd(programs.browser))
 hl.bind("SUPER + SPACE", hl.dsp.exec_cmd(programs.menu))
 hl.bind("CTRL + SUPER + SPACE", hl.dsp.exec_cmd(home .. "/.config/quickshell/qs-wallpaper-toggle.sh"))
-hl.bind("CTRL + SUPER + T", hl.dsp.exec_cmd(home .. "/.config/quickshell/widgets/waybar-config/waybar-config-toggle.sh"))
+hl.bind("CTRL + SUPER + T", hl.dsp.exec_cmd(home .. "/.config/quickshell/widgets/waybar-config/waybar-config-toggle.sh"), { comment = "Style Settings (Waybar + Window Borders)" })
+hl.bind("CTRL + SUPER + L", hl.dsp.exec_cmd(home .. "/.config/quickshell/widgets/llm-manager/llm-manager-toggle.sh"), { comment = "LLM Manager" })
 hl.bind("SUPER + C", hl.dsp.window.close())
 hl.bind("SUPER + M", hl.dsp.exit())
 hl.bind("SUPER + E", hl.dsp.exec_cmd(programs.fileManager))
@@ -15,11 +16,17 @@ hl.bind("SUPER + J", hl.dsp.layout("togglesplit"))
 
 hl.bind("INSERT", hl.dsp.exec_cmd("sh -c '" .. home .. "/.config/scripts/region-screenshot.sh'"))
 hl.bind("SUPER + V", hl.dsp.exec_cmd("sh -c 'cliphist list | rofi -dmenu | cliphist decode | wl-copy'"))
+hl.bind("SUPER + D", hl.dsp.exec_cmd(home .. "/.config/quickshell/widgets/dock/dock-toggle.sh"))
 
 hl.bind("SUPER + LEFT", hl.dsp.focus({ direction = "l" }))
 hl.bind("SUPER + RIGHT", hl.dsp.focus({ direction = "r" }))
 hl.bind("SUPER + UP", hl.dsp.focus({ direction = "u" }))
 hl.bind("SUPER + DOWN", hl.dsp.focus({ direction = "d" }))
+
+hl.bind("SUPER + SHIFT + LEFT", hl.dsp.window.resize({ x = -40, y = 0, relative = true }), { repeating = true })
+hl.bind("SUPER + SHIFT + RIGHT", hl.dsp.window.resize({ x = 40, y = 0, relative = true }), { repeating = true })
+hl.bind("SUPER + SHIFT + UP", hl.dsp.window.resize({ x = 0, y = -40, relative = true }), { repeating = true })
+hl.bind("SUPER + SHIFT + DOWN", hl.dsp.window.resize({ x = 0, y = 40, relative = true }), { repeating = true })
 
 for i = 1, 10 do
   local key = (i == 10) and "0" or tostring(i)

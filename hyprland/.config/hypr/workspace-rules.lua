@@ -32,6 +32,8 @@ hl.window_rule({ match = { class = "^jetbrains-.+$", float = true }, tag = "+jb"
 hl.window_rule({ match = { tag = "jb" }, stay_focused = true })
 hl.window_rule({ match = { tag = "jb" }, no_initial_focus = true })
 
+hl.layer_rule({ match = { namespace = "^quickshell-wallpaper-picker$" }, blur = true })
+
 if hl.plugin and hl.plugin.split_monitor_workspaces ~= nil then
   hl.config({
     plugin = {
