@@ -26,8 +26,10 @@ if command -v awww &> /dev/null; then
     WALLPAPER=$(awww query 2>/dev/null | grep 'currently displaying: image:' | head -1 | sed 's/.*image: //')
 fi
 
-# Try matugen first (with explicit flags since we're non-interactive)
-if [[ -n "$WALLPAPER" && -f "$WALLPAPER" ]] && command -v matugen &> /dev/null; then
+# Generate a palette only when this script is run standalone. Wallpaper changes
+# already run matugen before invoking matugen_reload.sh, so rerunning it here
+# would trigger duplicate Spicetify refreshes.
+if [[ ! -f "$COLORS" && -n "$WALLPAPER" && -f "$WALLPAPER" ]] && command -v matugen &> /dev/null; then
     if matugen --mode dark --prefer=darkness image "$WALLPAPER" 2>/dev/null; then
         : # matugen may have written to COLORS or not (4.x changed behavior)
     fi
@@ -211,7 +213,8 @@ if os.path.isfile(cfg_path):
 
 PY
 
-# Reapply spicetify to pick up new colors
+# Refresh colors and extensions without restarting Spotify. Restarting Spotify
+# churns its MPRIS player while Waybar is subscribed through libplayerctl.
 if command -v "$HOME/.spicetify/spicetify" &> /dev/null; then
-    PATH="$HOME/.spicetify:$PATH" spicetify apply --quiet 2>/dev/null || true
+    PATH="$HOME/.spicetify:$PATH" spicetify -q -n refresh -e 2>/dev/null || true
 fi
