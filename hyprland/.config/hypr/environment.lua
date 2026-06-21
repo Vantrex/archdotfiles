@@ -1,5 +1,5 @@
-hl.env("XCURSOR_SIZE", "24")
-hl.env("HYPRCURSOR_SIZE", "24")
+require("cursor")
+
 hl.env("NVD_BACKEND", "direct")
 hl.env("XDG_SESSION_TYPE", "wayland")
 hl.env("WLR_NO_HARDWARE_CURSORS", "1")

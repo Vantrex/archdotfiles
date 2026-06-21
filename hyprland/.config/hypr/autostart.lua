@@ -34,7 +34,7 @@ hl.on("hyprland.start", function()
     [[&& sleep 1.5 ]] ..
     [[&& hyprctl dispatch 'hl.dsp.focus({ monitor = "DP-2" })' ]] ..
     [[&& sleep 0.6 ]] ..
-    [[&& hyprctl dispatch 'hl.dsp.exec_cmd("spotify")' ]] ..
+    [[&& hyprctl dispatch 'hl.dsp.exec_cmd("env QT_QPA_PLATFORM=wayland GDK_BACKEND=wayland spotify")' ]] ..
     [[&& sleep 1 ]] ..
     [[&& hyprctl dispatch 'hl.dsp.focus({ monitor = "DP-3" })']]
   )

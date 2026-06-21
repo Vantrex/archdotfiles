@@ -26,7 +26,7 @@ hl.window_rule({ match = { float = false, workspace = "f[1]" }, rounding = 0 })
 
 hl.window_rule({ match = { class = "firefox" }, no_blur = true })
 
-hl.window_rule({ match = { class = "^com\\.mitchellh\\.ghostty$" }, opacity = "0.7 0.8" })
+hl.window_rule({ match = { class = "^com\\.mitchellh\\.ghostty$" }, opacity = "0.9 0.9" })
 
 hl.window_rule({ match = { class = "^jetbrains-.+$", float = true }, tag = "+jb" })
 hl.window_rule({ match = { tag = "jb" }, stay_focused = true })
