@@ -1,9 +1,0 @@
-[22:15:54 2026-05-07] FETCHING Version 2.43.2
-[22:15:54 2026-05-07] CREATING /home/marinus/.spicetify
-[22:15:54 2026-05-07] DOWNLOADING https://github.com/spicetify/cli/releases/download/v2.43.2/spicetify-2.43.2-linux-amd64.tar.gz
-[22:15:55 2026-05-07] EXTRACTING /home/marinus/.spicetify/spicetify.tar.gz
-[22:15:55 2026-05-07] SETTING EXECUTABLE PERMISSIONS TO /home/marinus/.spicetify/spicetify
-[22:15:55 2026-05-07] REMOVING /home/marinus/.spicetify/spicetify.tar.gz
-[22:15:55 2026-05-07] APPENDING /home/marinus/.spicetify to PATH in /home/marinus/.zshrc
-[22:15:55 2026-05-07] spicetify v2.43.2 was installed successfully to /home/marinus/.spicetify
-[22:15:55 2026-05-07] Run 'spicetify --help' to get started

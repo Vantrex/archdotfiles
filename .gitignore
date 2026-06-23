@@ -5,3 +5,7 @@ __pycache__/
 .cache/
 *.tmp
 *.log
+
+# Generated artifacts
+install.log
+*.tgz
