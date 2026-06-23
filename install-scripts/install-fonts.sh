@@ -34,19 +34,14 @@ install_font() {
   echo "  -> $FONT_DIR/$dest/"
 }
 
-# JetBrains Mono — resolve latest version from GitHub API, then download release zip
-if command -v jq >/dev/null 2>&1; then
-  JETBRAINS_VERSION="$(curl -fsSL https://api.github.com/repos/JetBrains/JetBrainsMono/releases/latest | jq -r '.tag_name' | sed 's/^v//')"
-else
-  JETBRAINS_VERSION="$(curl -fsSL https://api.github.com/repos/JetBrains/JetBrainsMono/releases/latest | grep '"tag_name"' | head -1 | sed 's/.*"v\([^"]*\)".*/\1/')"
-fi
+# JetBrains Mono Nerd Font — from ryanoasis/nerd-fonts
 install_font "JetBrainsMono" \
-  "https://github.com/JetBrains/JetBrainsMono/releases/download/v${JETBRAINS_VERSION}/JetBrainsMono-${JETBRAINS_VERSION}.zip" \
+  "https://github.com/ryanoasis/nerd-fonts/releases/latest/download/JetBrainsMono.tar.xz" \
   "JetBrainsMono"
 
-# Maple Mono Nerd Font variant
-install_font "MapleMono-NF" \
-  "https://github.com/subframe7536/maple-font/releases/latest/download/MapleMono-NF.zip" \
+# Maple Mono — vanilla release
+install_font "MapleMono" \
+  "https://github.com/subframe7536/maple-font/releases/latest/download/MapleMono.zip" \
   "MapleMono"
 
 # Mononoki Nerd Font
