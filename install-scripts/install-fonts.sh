@@ -41,7 +41,7 @@ install_font "JetBrainsMono" \
 
 # Maple Mono — vanilla release
 install_font "MapleMono" \
-  "https://github.com/subframe7536/maple-font/releases/latest/download/MapleMono.zip" \
+  "https://github.com/subframe7536/maple-font/releases/latest/download/MapleMono-TTF.zip" \
   "MapleMono"
 
 # Mononoki Nerd Font
