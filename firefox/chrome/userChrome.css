@@ -1,0 +1,500 @@
+/* ==========================================================================
+ * Firefox True-Black Theme — Material-Black palette
+ * Base: #1a1b26  |  Surface: #24283b  |  Accent: #7aa2f7
+ * ========================================================================== */
+
+/* --- CSS Custom Properties (global overrides) --- */
+:root {
+  /* Toolbar / window background */
+  --lwt-accent-color: #1a1b26 !important;
+  --lwt-accent-color-inactive: #1a1b26 !important;
+  --toolbar-bgcolor: #1a1b26 !important;
+  --toolbar-non-lwt-bgcolor: #1a1b26 !important;
+  --lwt-toolbarbutton-icon-fill-attention: #7aa2f7 !important;
+
+  /* Tab text & backgrounds */
+  --tab-selected-bgcolor: #24283b !important;
+  --tab-selected-textcolor: #c0caf5 !important;
+  --tab-text: #c0caf5 !important;
+  --tab-background: #1a1b26 !important;
+
+  /* URL bar */
+  --urlbar-box-bgcolor: #24283b !important;
+  --urlbar-box-hover-bgcolor: #24283b !important;
+  --urlbar-box-focus-bgcolor: #24283b !important;
+  --urlbar-icon-fill-opacity: 1 !important;
+
+  /* Popup / menu */
+  --panel-background: #24283b !important;
+  --panel-border-color: #1a1b26 !important;
+  --arrowpanel-dimmed: #1a1b26 !important;
+  --arrowpanel-dimmed-further: #1a1b26 !important;
+
+  /* Sidebar */
+  --sidebar-background-color: #1a1b26 !important;
+  --sidebar-text-color: #c0caf5 !important;
+  --sidebar-border-color: #24283b !important;
+
+  /* Colorway dark theme variables */
+  --colorway-accent-color-dark: #1a1b26 !important;
+  --colorway-bgcolor-dark: #1a1b26 !important;
+  --colorway-textcolor-dark: #c0caf5 !important;
+
+  /* Proton dark overrides */
+  --in-content-page-background: #1a1b26 !important;
+  --in-content-primary-button-background: #7aa2f7 !important;
+  --in-content-primary-button-background-hover: #89b4fa !important;
+  --in-content-primary-button-background-active: #5d7fd3 !important;
+  --in-content-text-color: #c0caf5 !important;
+  --in-content-deemphasized-text: #a9b1d6 !important;
+  --in-content-box-background: #24283b !important;
+  --in-content-box-info-background: #1a1b26 !important;
+  --in-content-item-hover: rgba(122, 162, 247, 0.15) !important;
+  --in-content-item-selected: rgba(122, 162, 247, 0.25) !important;
+  --in-content-item-selected-focus: rgba(122, 162, 247, 0.35) !important;
+}
+
+/* ==========================================================================
+ * 1. Tab Strip / Tabs Toolbar
+ * ========================================================================== */
+#navigator-toolbox,
+#TabsToolbar {
+  background-color: #1a1b26 !important;
+  border-bottom: none !important;
+}
+
+#tabbrowser-tabs {
+  background-color: transparent !important;
+}
+
+.tab-background {
+  background-color: #1a1b26 !important;
+  border: none !important;
+}
+
+.tab-background[selected] {
+  background-color: #24283b !important;
+}
+
+.tabbrowser-tab:hover > .tab-stack > .tab-background:not([selected]) {
+  background-color: #24283b !important;
+}
+
+.tab-icon-image,
+.tab-label,
+.tab-throbber {
+  color: #c0caf5 !important;
+}
+
+/* Firefox View button */
+#firefox-view-button {
+  fill: #c0caf5 !important;
+}
+
+#firefox-view-button:hover {
+  background-color: #24283b !important;
+}
+
+/* New tab & all tabs buttons */
+#tabbrowser-arrowscrollbox > .scrollbutton-up,
+#tabbrowser-arrowscrollbox > .scrollbutton-down,
+#new-tab-button,
+#alltabs-button {
+  fill: #c0caf5 !important;
+}
+
+#new-tab-button:hover,
+#alltabs-button:hover {
+  background-color: #24283b !important;
+}
+
+/* ==========================================================================
+ * 2. Navigation Toolbar (URL bar area)
+ * ========================================================================== */
+#nav-bar {
+  background-color: #1a1b26 !important;
+  border-bottom: none !important;
+}
+
+#urlbar-background,
+#searchbar {
+  background-color: #24283b !important;
+  border-color: transparent !important;
+}
+
+#urlbar[breakout][breakout-extend] {
+  background-color: #24283b !important;
+}
+
+#urlbar-input,
+#searchbar-search-text {
+  color: #c0caf5 !important;
+}
+
+/* Navigation buttons */
+#back-button .toolbarbutton-icon,
+#forward-button .toolbarbutton-icon,
+#reload-button .toolbarbutton-icon,
+#stop-button .toolbarbutton-icon,
+#home-button .toolbarbutton-icon,
+#downloads-button .toolbarbutton-icon,
+#sidebar-button .toolbarbutton-icon {
+  fill: #c0caf5 !important;
+}
+
+#back-button:hover .toolbarbutton-icon,
+#forward-button:hover .toolbarbutton-icon,
+#reload-button:hover .toolbarbutton-icon,
+#stop-button:hover .toolbarbutton-icon,
+#home-button:hover .toolbarbutton-icon,
+#downloads-button:hover .toolbarbutton-icon,
+#sidebar-button:hover .toolbarbutton-icon {
+  fill: #7aa2f7 !important;
+}
+
+/* URL bar icons */
+.urlbar-icon,
+.urlbar-icon-wrapper {
+  fill: #c0caf5 !important;
+}
+
+/* Search suggestions / urlbar results */
+.urlbarView-row {
+  background-color: transparent !important;
+}
+
+.urlbarView-row:hover,
+.urlbarView-row[selected] {
+  background-color: #24283b !important;
+}
+
+.urlbarView-no-wrap .urlbarView-url,
+.urlbarView-title-separator + .urlbarView-title {
+  color: #a9b1d6 !important;
+}
+
+.urlbarView-type-icon {
+  fill: #a9b1d6 !important;
+}
+
+/* Extension popup area */
+#unified-extensions-button {
+  fill: #c0caf5 !important;
+}
+
+/* ==========================================================================
+ * 3. Menubar
+ * ========================================================================== */
+#toolbar-menubar {
+  background-color: #1a1b26 !important;
+  color: #c0caf5 !important;
+}
+
+menupopup > menu,
+menupopup > menuitem {
+  color: #c0caf5 !important;
+}
+
+/* ==========================================================================
+ * 4. Popups / Dropdown Menus
+ * ========================================================================== */
+.panel-subview-body,
+panel,
+menupopup,
+#appMenu-popup,
+#widget-overflow-popup,
+#unified-extensions-panel {
+  background-color: #24283b !important;
+  color: #c0caf5 !important;
+  border-color: #1a1b26 !important;
+}
+
+menupopup menuitem:hover,
+menupopup menu:hover,
+.panel-subview-body > .panel-subview-item:hover {
+  background-color: #1a1b26 !important;
+}
+
+/* App menu */
+#appMenu-popup .toolbarbutton-text {
+  color: #c0caf5 !important;
+}
+
+/* Context menus */
+menupopup menuitem,
+menupopup menu {
+  color: #c0caf5 !important;
+}
+
+menupopup menuitem:hover,
+menupopup menu:hover {
+  background-color: #1a1b26 !important;
+}
+
+/* ==========================================================================
+ * 5. Sidebar
+ * ========================================================================== */
+#sidebar-box {
+  background-color: #1a1b26 !important;
+  color: #c0caf5 !important;
+  border-right: 1px solid #24283b !important;
+}
+
+#sidebar-header {
+  background-color: #1a1b26 !important;
+  color: #c0caf5 !important;
+  border-bottom: 1px solid #24283b !important;
+}
+
+/* Sidebar tree items */
+.sidebar-placesTreechildren,
+#historyTree,
+#bookmarksView {
+  background-color: #1a1b26 !important;
+  color: #c0caf5 !important;
+}
+
+.sidebar-placesTreechildren::-moz-tree-row(hover),
+#historyTree::-moz-tree-row(hover),
+#bookmarksView::-moz-tree-row(hover) {
+  background-color: #24283b !important;
+}
+
+.sidebar-placesTreechildren::-moz-tree-row(selected),
+#historyTree::-moz-tree-row(selected),
+#bookmarksView::-moz-tree-row(selected) {
+  background-color: #7aa2f7 !important;
+}
+
+/* ==========================================================================
+ * 6. about: Pages (newtab, home, preferences, etc.)
+ * ========================================================================== */
+
+/* about:preferences */
+prefwindow,
+#preferences-main {
+  background-color: #1a1b26 !important;
+  color: #c0caf5 !important;
+}
+
+.subcategory,
+.category {
+  background-color: transparent !important;
+  color: #c0caf5 !important;
+}
+
+.subcategory:hover,
+.category:hover {
+  background-color: #24283b !important;
+}
+
+.subcategory[selected],
+.category[selected] {
+  background-color: #7aa2f7 !important;
+}
+
+/* about:newtab / about:home */
+@-moz-document url("about:newtab"), url("about:home") {
+  body {
+    --newtab-background-color: #1a1b26 !important;
+    --newtab-text-primary-color: #c0caf5 !important;
+    --newtab-wordmark-color: #c0caf5 !important;
+    --newtab-icon-color: #c0caf5 !important;
+    --newtab-loading-icon-color: #24283b !important;
+    --newtab-link-color: #7aa2f7 !important;
+    --newtab-link-hover-color: #89b4fa !important;
+    --newtab-element-hover-color: #24283b !important;
+    --newtab-element-active-color: #1a1b26 !important;
+    --newtab-element-secondary-color: #24283b !important;
+    --newtab-primary-action-background: #7aa2f7 !important;
+    --newtab-primary-action-hover-background: #89b4fa !important;
+    --newtab-primary-action-text: #1a1b26 !important;
+    --newtab-card-background-color: #24283b !important;
+    --newtab-card-hover-background-color: #1a1b26 !important;
+    --newtab-card-outline-color: #7aa2f7 !important;
+    --newtab-search-handoff-border-color: #24283b !important;
+    --newtab-focus-outline-color: #7aa2f7 !important;
+    --newtab-overlay-background-color: rgba(26, 27, 38, 0.8) !important;
+    --newtab-modal-border-color: #24283b !important;
+    --newtab-toggle-button-color: #c0caf5 !important;
+    --newtab-toggle-button-background-color: #24283b !important;
+    --newtab-context-menu-description-color: #a9b1d6 !important;
+    --newtab-customization-done-button-background-color: #7aa2f7 !important;
+    --newtab-customization-done-button-text-color: #1a1b26 !important;
+    --newtab-customization-snackbar-background-color: #24283b !important;
+    --newtab-customization-snackbar-button-background-color: #7aa2f7 !important;
+    --newtab-customization-snackbar-button-text-color: #1a1b26 !important;
+    background-color: #1a1b26 !important;
+  }
+
+  .top-site-outer {
+    background-color: #24283b !important;
+  }
+
+  .top-site-outer:hover {
+    background-color: #1a1b26 !important;
+  }
+
+  .search-handoff-button {
+    background-color: #24283b !important;
+    color: #c0caf5 !important;
+  }
+
+  .search-handoff-button:hover {
+    background-color: #1a1b26 !important;
+  }
+
+  .context-menu {
+    background-color: #24283b !important;
+    color: #c0caf5 !important;
+  }
+
+  .context-menu-item:hover {
+    background-color: #1a1b26 !important;
+  }
+}
+
+/* about:config */
+@-moz-document url("about:config") {
+  body {
+    background-color: #1a1b26 !important;
+    color: #c0caf5 !important;
+  }
+
+  #prefs-table {
+    background-color: #1a1b26 !important;
+  }
+
+  #prefs-table tr:hover {
+    background-color: #24283b !important;
+  }
+
+  #prefs-table tr.selected {
+    background-color: #7aa2f7 !important;
+  }
+
+  .pref-name,
+  .pref-type,
+  .pref-value {
+    color: #c0caf5 !important;
+  }
+}
+
+/* about:addons */
+@-moz-document url("about:addons") {
+  body {
+    background-color: #1a1b26 !important;
+    color: #c0caf5 !important;
+  }
+
+  .addon-card {
+    background-color: #24283b !important;
+  }
+
+  .sidebar-main {
+    background-color: #1a1b26 !important;
+  }
+}
+
+/* ==========================================================================
+ * 7. Scrollbars (dark, minimal)
+ * ========================================================================== */
+scrollbar {
+  scrollbar-color: #24283b #1a1b26 !important;
+}
+
+::-webkit-scrollbar {
+  width: 8px !important;
+  height: 8px !important;
+}
+
+::-webkit-scrollbar-track {
+  background: #1a1b26 !important;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #24283b !important;
+  border-radius: 4px !important;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #7aa2f7 !important;
+}
+
+/* ==========================================================================
+ * 8. Bookmarks bar
+ * ========================================================================== */
+#PersonalToolbar {
+  background-color: #1a1b26 !important;
+}
+
+.bookmark-item {
+  color: #c0caf5 !important;
+}
+
+.bookmark-item:hover {
+  background-color: #24283b !important;
+}
+
+/* ==========================================================================
+ * 9. Notifications / infobars
+ * ========================================================================== */
+notificationbox,
+#tab-notification-deck {
+  background-color: #24283b !important;
+  color: #c0caf5 !important;
+}
+
+/* ==========================================================================
+ * 10. Find bar
+ * ========================================================================== */
+#FindToolbar {
+  background-color: #24283b !important;
+  color: #c0caf5 !important;
+}
+
+.findbar-textbox {
+  background-color: #1a1b26 !important;
+  color: #c0caf5 !important;
+}
+
+/* ==========================================================================
+ * 11. Page action buttons & overflow
+ * ========================================================================== */
+.page-action,
+.urlbar-page-action {
+  fill: #c0caf5 !important;
+}
+
+.page-action:hover,
+.urlbar-page-action:hover {
+  background-color: #24283b !important;
+}
+
+/* ==========================================================================
+ * 12. Remove all borders / separators for clean look
+ * ========================================================================== */
+#navigator-toolbox::after {
+  display: none !important;
+}
+
+#TabsToolbar > .toolbar-items,
+#nav-bar > .toolbar-items {
+  border: none !important;
+}
+
+/* Separator lines in toolbars */
+.toolbar-items .toolbarbutton-1 + .toolbarbutton-1 {
+  margin-left: 0 !important;
+}
+
+/* ==========================================================================
+ * 13. DevTools (bonus — matches theme)
+ * ========================================================================== */
+@-moz-document url-prefix("chrome://devtools/content/") {
+  body,
+  html {
+    background-color: #1a1b26 !important;
+    color: #c0caf5 !important;
+  }
+}
