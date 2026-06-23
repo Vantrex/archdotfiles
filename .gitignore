@@ -9,3 +9,6 @@ __pycache__/
 # Generated artifacts
 install.log
 *.tgz
+
+# Font archives (downloaded on install)
+fonts/Font_*.tar.gz
